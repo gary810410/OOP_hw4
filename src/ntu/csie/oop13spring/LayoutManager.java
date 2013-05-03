@@ -1,14 +1,11 @@
 package ntu.csie.oop13spring;
 //import javax.swing.*;
 
-import java.awt.Container;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.*;
 
 import javax.swing.*;
 
-import java.util.concurrent.TimeUnit;
 
 // width = 800;
 // height = 600;
@@ -21,7 +18,6 @@ public class LayoutManager implements MouseListener{
 	int width;
 	int height;
 	private int TotalPet;
-	private POOPet[] Pets;
 	private CoordinateXY[] Position;
 	private JButton[] Button;
 	private JLayeredPane background;
@@ -50,9 +46,7 @@ public class LayoutManager implements MouseListener{
 	public void setPetInit(POOPet[] Pets)
 	{
 		TotalPet = Pets.length;
-		this.Pets = new POOPet[TotalPet];
 		this.Position = new CoordinateXY[TotalPet];
-		this.Pets = Pets;
 		for(int i=0; i<TotalPet; i++)
 		{
 			Position[i] = new CoordinateXY();
@@ -63,7 +57,12 @@ public class LayoutManager implements MouseListener{
 	public void setPetButton(JButton petButton, int petID)
 	{
 		Button[petID] = petButton;
-		Button[petID].addMouseListener(this);
+		
+	}
+	
+	public CoordinateXY getPosition(int petID)
+	{
+		return Position[petID];
 	}
 	public int getXPosition(int petID)
 	{
@@ -72,6 +71,14 @@ public class LayoutManager implements MouseListener{
 	public int getYPosition(int petID)
 	{
 		return Position[petID].getY() * imgheight;
+	}
+	public JButton[][] getButtons()
+	{
+		return matrixbutton;
+	}
+	public void setCurrentChangePID(int ID)
+	{
+		currentChangePID = ID;
 	}
 	
 	public static void main(String[] argv)
@@ -102,20 +109,6 @@ public class LayoutManager implements MouseListener{
 					}
 					matrixbutton[i][j].setVisible(false);
 				}
-			
-			for(int i=0; i<TotalPet; i++)
-			{
-				if((JButton)triggered == Button[i])
-				{
-					currentChangePID = i;
-					for(int j=0; j<width/imgwidth; j++)
-						for(int k=0; k<height/imgheight; k++)
-						{
-							if(Position[currentChangePID].distance(j, k) <= Pets[currentChangePID].getAGI())
-								matrixbutton[j][k].setVisible(true);
-						}
-				}
-			}
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
 		{
