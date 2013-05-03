@@ -1,18 +1,19 @@
 package ntu.csie.oop13spring;
 
-import java.awt.FlowLayout;
+import java.awt.event.*;
 import java.io.IOException;
 
-import javax.swing.JLabel;
+import javax.swing.*;
 
 public class Arena1 extends POOArena{
 	
 	private POOPet[] Pets;
-	private ImageLabel[] PetImg;
+	private ImageButton[] PetImg;
 	private ImageJFrame mainFrame;
-	private JLabel label;
-	private JLabel background;
+	private JButton[] Button;
+	private JLayeredPane background;
 	private LayoutManager layout;
+	private static int TotalPetNumber;
 	
 	public Arena1() throws IOException
 	{
@@ -20,24 +21,30 @@ public class Arena1 extends POOArena{
 		Pets = new POOPet[2];
 		Pets[0] = new Pet1();
 		Pets[1] = new Pet1();
+		TotalPetNumber = Pets.length;
+		PetImg = new ImageButton[TotalPetNumber];
 		
-		PetImg = new ImageLabel[Pets.length];
-		layout = new LayoutManager(800, 600);
 		
 		// main frame
 		mainFrame = new ImageJFrame("battle game", "grass.png");
-		mainFrame.setLayout(new FlowLayout());
 		background = mainFrame.getBackGround();
 		background.setLayout(null);
+		layout = new LayoutManager(800, 600, background);
+		//background.addActionListener()
+		
 
 		// set pets
 		layout.setPetInit(Pets);
-		for(int i=0; i<Pets.length; i++)
+		
+		Button = new JButton[TotalPetNumber];
+		for(int i=0; i<TotalPetNumber; i++)
 		{
-			PetImg[i] = new ImageLabel("black.png");
-			label = PetImg[i].getLabel();
-			label.setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
-			background.add(label);
+			PetImg[i] = new ImageButton("black.png");
+			Button[i] = PetImg[i].getButton();
+			layout.setPetButton(Button[i], i);
+			//Button[i].addMouseListener(this);
+			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
+			background.add(Button[i], JLayeredPane.PALETTE_LAYER);
 		}
         mainFrame.setVisible(true);
 	}
