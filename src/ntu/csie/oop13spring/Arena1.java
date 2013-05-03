@@ -42,7 +42,6 @@ public class Arena1 extends POOArena{
 			PetImg[i] = new ImageButton("black.png");
 			Button[i] = PetImg[i].getButton();
 			layout.setPetButton(Button[i], i);
-			//Button[i].addMouseListener(this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
 			background.add(Button[i], JLayeredPane.PALETTE_LAYER);
 		}

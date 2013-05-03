@@ -22,7 +22,7 @@ public class LayoutManager implements MouseListener{
 	int height;
 	private int TotalPet;
 	private POOPet[] Pets;
-	private PetPosition[] Position;
+	private CoordinateXY[] Position;
 	private JButton[] Button;
 	private JLayeredPane background;
 	private JButton[][] matrixbutton;
@@ -51,11 +51,11 @@ public class LayoutManager implements MouseListener{
 	{
 		TotalPet = Pets.length;
 		this.Pets = new POOPet[TotalPet];
-		this.Position = new PetPosition[TotalPet];
+		this.Position = new CoordinateXY[TotalPet];
 		this.Pets = Pets;
 		for(int i=0; i<TotalPet; i++)
 		{
-			Position[i] = new PetPosition();
+			Position[i] = new CoordinateXY();
 		}
 		Button = new JButton[TotalPet];
 	}
@@ -67,12 +67,13 @@ public class LayoutManager implements MouseListener{
 	}
 	public int getXPosition(int petID)
 	{
-		return Position[petID].getXposition() * imgwidth;
+		return Position[petID].getX() * imgwidth;
 	}
 	public int getYPosition(int petID)
 	{
-		return Position[petID].getYposition() * imgheight;
+		return Position[petID].getY() * imgheight;
 	}
+	
 	public static void main(String[] argv)
 	{
 		ImageJFrame mainFrame = new ImageJFrame("battle game", "grass.png");
@@ -96,7 +97,7 @@ public class LayoutManager implements MouseListener{
 				{
 					if((JButton)triggered == matrixbutton[i][j])
 					{
-						Position[currentChangePID].setPosition(i, j);
+						Position[currentChangePID].setXY(i, j);
 						Button[currentChangePID].setBounds(i*40, j*40, 40, 40);
 					}
 					matrixbutton[i][j].setVisible(false);
@@ -106,14 +107,13 @@ public class LayoutManager implements MouseListener{
 			{
 				if((JButton)triggered == Button[i])
 				{
+					currentChangePID = i;
 					for(int j=0; j<width/imgwidth; j++)
 						for(int k=0; k<height/imgheight; k++)
 						{
-							//con.setComponentZOrder(matrixbutton[i][j], 0);
-							matrixbutton[j][k].setVisible(true);
-							 
+							if(Position[currentChangePID].distance(j, k) <= Pets[currentChangePID].getAGI())
+								matrixbutton[j][k].setVisible(true);
 						}
-					currentChangePID = i;
 				}
 			}
 		}
@@ -137,50 +137,5 @@ public class LayoutManager implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
-	}
-}
-
-class PetPosition{
-	private int x;
-	private int y;
-	private static final int widthnumber = 20;
-	private static final int heightnumber = 15;
-	
-	
-	public PetPosition()
-	{
-		Random random = new Random();
-		x = random.nextInt(widthnumber);
-		y = random.nextInt(heightnumber);
-	}
-	public PetPosition(int x, int y)
-	{
-		this.x = x;
-		this.y = y;
-	}
-	public void setPosition(int x, int y)
-	{
-		this.x = x;
-		this.y = y;
-	}
-	public int getXposition()
-	{
-		return x;
-	}
-	public int getYposition()
-	{
-		return y;
-	}
-	public boolean move(int x, int y)
-	{
-		if(x < widthnumber && y < heightnumber)
-		{
-			this.x = x;
-			this.y = y;
-			return true;
-		}
-		else
-			return false;
-		
 	}
 }

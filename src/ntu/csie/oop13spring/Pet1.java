@@ -8,7 +8,9 @@ public class Pet1 extends POOPet{
 	
 	public Pet1()
 	{
-
+		setHP(5);
+		setMP(5);
+		setAGI(2);
 	}
 	public String getImgPath()
 	{
