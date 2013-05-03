@@ -5,8 +5,12 @@ import java.awt.event.MouseListener;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
+import javax.swing.JLayeredPane;
+import javax.swing.JList;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class Pet1 extends POOPet implements MouseListener{
+public class Pet1 extends POOPet implements MouseListener, ListSelectionListener{
 	
 	POOAction action;
 	CoordinateXY location;
@@ -19,7 +23,13 @@ public class Pet1 extends POOPet implements MouseListener{
 	int ID;
 	private LayoutManager layout;
 	private JButton[][] matrixbutton;
+	private JLayeredPane background;
 	JButton itself;
+	
+	// functional skill
+	String[] listItems = {"quit", "A", "B"};
+	
+	JList<String> list;
 	
 	public Pet1()
 	{
@@ -36,22 +46,25 @@ public class Pet1 extends POOPet implements MouseListener{
 		
 		return action;
 	}
-	protected void setLocation(CoordinateXY location)
+	
+	public void setALL(CoordinateXY location, JButton it, int ID, POOArena arena)
 	{
 		this.location = location;
-	}
-	protected void setID(int ID)
-	{
 		this.ID = ID;
-	}
-	protected void setItself(JButton it)
-	{
 		itself = it;
 		it.addMouseListener(this);
+		background = ((Arena1)arena).getBackground();
+		layout = ((Arena1)arena).getLayoutManager();
+		matrixbutton = layout.getButtons();
+		list = new JList<String>( listItems);
+		list.setVisible(false);
+		list.addListSelectionListener(this);
+		background.add(list, JLayeredPane.POPUP_LAYER);
 	}
 	protected POOCoordinate move(POOArena arena)
 	{
 		movestep = 1;
+		background = ((Arena1)arena).getBackground();
 		layout = ((Arena1)arena).getLayoutManager();
 		matrixbutton = layout.getButtons();
 		while(movestep != 0)
@@ -105,8 +118,17 @@ public class Pet1 extends POOPet implements MouseListener{
 		else if(e.getButton() == MouseEvent.BUTTON3)
 		{
 			System.out.println("right");
+			if(movestep == 1)
+			{
+				list.setBounds(location.getX()*40+40, location.getY()*40, 50, listItems.length * 20);
+				list.setVisible(true);
+				
+				movestep = 3;
+			}
 		}
 	}
+	
+	// for list selection
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		// do nothing
@@ -122,5 +144,14 @@ public class Pet1 extends POOPet implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
+	}
+	@Override
+	public void valueChanged(ListSelectionEvent arg0) {
+		// TODO Auto-generated method stub
+		int index = arg0.getFirstIndex();
+		System.out.println(listItems[index]);
+		list.setVisible(false);
+		movestep = 0;
+		
 	}
 }

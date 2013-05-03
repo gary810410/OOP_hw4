@@ -51,10 +51,7 @@ public class Arena1 extends POOArena{
 			PetImg[i] = new ImageButton("black.png");
 			Button[i] = PetImg[i].getButton();
 			position[i] = layout.getPosition(i);
-			((Pet1)Pets[i]).setLocation(position[i]);
-			((Pet1)Pets[i]).setID(i);
-			layout.setPetButton(Button[i], i);
-			((Pet1)Pets[i]).setItself(Button[i]);
+			((Pet1)Pets[i]).setALL(position[i], Button[i], i, this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
 			background.add(Button[i], JLayeredPane.PALETTE_LAYER);
 		}
@@ -86,6 +83,10 @@ public class Arena1 extends POOArena{
 	public JButton getCurrentPet()
 	{
 		return Button[currentPetID];
+	}
+	public JLayeredPane getBackground()
+	{
+		return background;
 	}
 	public static void main(String argv[])
 	{
