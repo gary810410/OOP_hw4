@@ -28,8 +28,8 @@ public class Arena1 extends POOArena{
 	{
 		//Pets = getAllPets();
 		Pets = new POOPet[2];
-		Pets[0] = new Pet1();
-		Pets[1] = new Pet1();
+		Pets[0] = new PetSlime();
+		Pets[1] = new PetMudMonster();
 		TotalPetNumber = Pets.length;
 		PetImg = new ImageButton[TotalPetNumber];
 		
@@ -48,10 +48,10 @@ public class Arena1 extends POOArena{
 		Button = new JButton[TotalPetNumber];
 		for(int i=0; i<TotalPetNumber; i++)
 		{
-			PetImg[i] = new ImageButton("black.png");
+			PetImg[i] = new ImageButton(((PetBase)Pets[i]).getImgPath());
 			Button[i] = PetImg[i].getButton();
 			position[i] = layout.getPosition(i);
-			((Pet1)Pets[i]).setALL(position[i], Button[i], i, this);
+			((PetBase)Pets[i]).setALL(position[i], Button[i], i, this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
 			//layout.setPetButton(Button[i], i);
 			//background.add(Button[i], JLayeredPane.PALETTE_LAYER);
