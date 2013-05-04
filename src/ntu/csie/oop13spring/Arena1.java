@@ -19,8 +19,8 @@ public class Arena1 extends POOArena{
 	private int currentPetID;
 	
 	// boarder color
-	public static final Color activeColor = new Color(128,0,128);
-	public static final MatteBorder activeBorder = new MatteBorder(5,5,5,5,activeColor);
+	public static final Color activeColor = new Color(225,127,39);
+	public static final MatteBorder activeBorder = new MatteBorder(3,3,3,3,activeColor);
 	public static final Color defaultColor = new Color(0,0,0);
 	public static final MatteBorder defaultBorder = new MatteBorder(0,0,0,0,defaultColor);
 	
@@ -53,7 +53,9 @@ public class Arena1 extends POOArena{
 			position[i] = layout.getPosition(i);
 			((Pet1)Pets[i]).setALL(position[i], Button[i], i, this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
-			background.add(Button[i], JLayeredPane.PALETTE_LAYER);
+			//layout.setPetButton(Button[i], i);
+			//background.add(Button[i], JLayeredPane.PALETTE_LAYER);
+			background.add(Button[i], JLayeredPane.POPUP_LAYER);
 		}
         mainFrame.setVisible(true);
 	}
@@ -64,6 +66,7 @@ public class Arena1 extends POOArena{
 		{
 			Button[i].setBorder(activeBorder);
 			getPosition(Pets[i]);
+			Pets[i].act(this);
 			Button[i].setBorder(defaultBorder);
 		}
 		return true;
@@ -88,12 +91,19 @@ public class Arena1 extends POOArena{
 	{
 		return background;
 	}
+	public POOPet[] getPets()
+	{
+		return Pets;
+	}
 	public static void main(String argv[])
 	{
 		Arena1 a;
 		try{
 			a = new Arena1();
-			a.fight();
+			while(true)
+			{
+				a.fight();
+			}
 		}catch(Exception e)
 		{
 			System.out.println(e);

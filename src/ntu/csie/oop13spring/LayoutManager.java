@@ -37,9 +37,10 @@ public class LayoutManager implements MouseListener{
 				matrixbutton[i][j].setOpaque(false);
 				matrixbutton[i][j].setContentAreaFilled(false);
 				matrixbutton[i][j].setBounds(i*40, j*40, 40, 40);
-				this.background.add(matrixbutton[i][j],JLayeredPane.POPUP_LAYER);
+				//this.background.add(matrixbutton[i][j],JLayeredPane.POPUP_LAYER);
+				this.background.add(matrixbutton[i][j], JLayeredPane.PALETTE_LAYER);
 				matrixbutton[i][j].addMouseListener(this);
-				matrixbutton[i][j].setVisible(false);
+				//matrixbutton[i][j].setVisible(false);
 			}
 	}
 	
@@ -94,7 +95,7 @@ public class LayoutManager implements MouseListener{
 		
 	}
 	
-	public void mouseClicked(MouseEvent e) {
+	public void mouseClicked(MouseEvent e) {/*
 		if(e.getButton() == MouseEvent.BUTTON1)
 		{
 			System.out.println("left");
@@ -102,7 +103,7 @@ public class LayoutManager implements MouseListener{
 			for(int i=0; i<this.width/imgwidth; i++)
 				for(int j=0; j<this.height/imgheight; j++)
 				{
-					if((JButton)triggered == matrixbutton[i][j])
+					if(triggered == matrixbutton[i][j])
 					{
 						Position[currentChangePID].setXY(i, j);
 						Button[currentChangePID].setBounds(i*40, j*40, 40, 40);
@@ -113,7 +114,7 @@ public class LayoutManager implements MouseListener{
 		else if(e.getButton() == MouseEvent.BUTTON3)
 		{
 			System.out.println("right");
-		}
+		}*/
 	}
 	@Override
 	public void mouseEntered(MouseEvent e) {

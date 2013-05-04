@@ -40,8 +40,14 @@ public class CoordinateXY extends POOCoordinate{
 	{
 		return y;
 	}
-	public int distance(int x, int y)
+	public double distance(int x, int y)
 	{
 		return Math.abs(this.x-x)+Math.abs(this.y-y);
+		//return Math.sqrt(Math.pow(this.x-x, 2) + Math.pow(this.y-y, 2));
+	}
+	public double distance(CoordinateXY another)
+	{
+		return Math.abs(x-another.getX()) + Math.abs(y-another.getY());
+		//return Math.sqrt(Math.pow(this.x-another.getX(), 2) + Math.pow(this.y-another.getY(), 2));
 	}
 }
