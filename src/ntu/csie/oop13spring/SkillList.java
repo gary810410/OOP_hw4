@@ -6,6 +6,7 @@ public class SkillList extends POOSkill{
 	protected boolean needAssignPet;
 	protected boolean effectSelf;
 	protected double splashrange;
+	protected String name;
 	
 	public SkillList()
 	{
@@ -13,6 +14,7 @@ public class SkillList extends POOSkill{
 		needAssignPet = false;
 		effectSelf = true;
 		splashrange = 0;
+		name = "wait";
 	}
 	@Override
 	public void act(POOPet pet) {
@@ -35,6 +37,10 @@ public class SkillList extends POOSkill{
 	{
 		return splashrange;
 	}
+	public String getName()
+	{
+		return name;
+	}
 	
 }
 
@@ -46,6 +52,7 @@ class ActionTinyAttack extends SkillList{
 		needAssignPet = true;
 		effectSelf = true;
 		splashrange = 0;
+		name = "tinyAttack";
 	}
 	public void act(POOPet pet)
 	{
@@ -66,6 +73,7 @@ class ActionMudSplash extends SkillList{
 		needAssignPet = true;
 		effectSelf = true;
 		splashrange = 1;
+		name = "Mud";
 	}
 	public void act(POOPet pet)
 	{
@@ -89,6 +97,7 @@ class ActionFongi extends SkillList{
 		needAssignPet = true;
 		effectSelf = true;
 		splashrange = 0;
+		name = "Fongi";
 	}
 	public void act(POOPet pet)
 	{

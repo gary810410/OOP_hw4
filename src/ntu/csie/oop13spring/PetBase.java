@@ -8,14 +8,15 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JList;
+//import javax.swing.JList;
+//import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+//import javax.swing.event.ListSelectionEvent;
+//import javax.swing.event.ListSelectionListener;
 
-public abstract class PetBase extends POOPet implements MouseListener, ListSelectionListener{
+public abstract class PetBase extends POOPet implements MouseListener{
 	
 	
 	protected int imgwidth = 40;
@@ -48,11 +49,12 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 	private POOAction currentAction;
 	private static CoordinateXY dest;
 	private static int CurrentActID;
-	
+	private Skill_menu menu;
+	//private boolean selected;
 	
 	// functional skill
 	
-	private JList<String> list;
+	//private JList<String> list;
 	
 	public PetBase()
 	{
@@ -75,14 +77,17 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 	}
 	protected POOAction act(POOArena arena)
 	{
-		movestep = 3;
+		if(movestep == 0)
+			movestep = 3;
+		menu.setActivate(true);
 		CurrentActID = ID;
-		while(movestep != 0)
+		while(movestep != -2)
 		{
 			try{
 			TimeUnit.MICROSECONDS.sleep(100);
 			}catch(Exception e){}
 		}
+		menu.setActivate(false);
 		if(((SkillList)(currentAction.skill)).needAssignPet())
 		{
 			for(int i=0; i<Pets.length; i++)
@@ -112,6 +117,9 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 				matrixbutton[i][j].removeMouseListener(this);
 				matrixbutton[i][j].addMouseListener(layout);
 			}
+		
+		//selected=false;
+		
 		movestep = -1;
 		return action[1];
 	}
@@ -129,17 +137,21 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 		itself.addMouseListener(this);
 		background = ((Arena1)arena).getBackground();
 		layout = ((Arena1)arena).getLayoutManager();
-		matrixbutton = layout.getButtons();
+		matrixbutton = layout.getButtons();/*
 		list = new JList<String>(getItemsList());
 		list.setVisible(false);
 		list.addListSelectionListener(this);
-		background.add(list, JLayeredPane.DRAG_LAYER);
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		background.add(list, JLayeredPane.DRAG_LAYER);*/
+		// new
+		menu = new Skill_menu(this, getItemsList(), itself, background);
 		status = new Status_control(getHP(), getMP(), getAGI(), background);
 		statusLabel = status.getStatus();
 	}
 	protected POOCoordinate move(POOArena arena)
 	{
 		movestep = 1;
+		menu.setActivate(true);
 		CurrentActID = ID;
 		while(movestep == 1 || movestep == 2)
 		{
@@ -149,7 +161,8 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 			{
 			}
 		}
-		movestep = -1;
+		menu.setActivate(false);
+		//movestep = -1;
 		return location;
 	}
 	protected CoordinateXY getLocation()
@@ -164,6 +177,10 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 	{
 		movestep = i;
 	}
+	public int getMoveStep()
+	{
+		return movestep;
+	}
 	public void setTarget(boolean b)
 	{
 		targeted = b;
@@ -171,6 +188,34 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 	public boolean isTargeted()
 	{
 		return targeted;
+	}
+	public void setActionNum(int num)
+	{
+		currentAction.skill = action[num].skill;
+		double range = ((SkillList)(currentAction.skill)).getRange();
+		System.out.println(((SkillList)(currentAction.skill)).getName());
+		for(int i=0; i<Pets.length; i++)
+			if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range)
+				((PetBase)(Pets[i])).setTarget(true);
+		if(((SkillList)(action[num].skill)).needAssignPet())
+		{
+			
+			for(int i=0; i<this.width/imgwidth; i++)
+				for(int j=0; j<this.height/imgheight; j++)
+				{
+					if(location.distance(i, j) <= range)
+					{
+						matrixbutton[i][j].setBorder(redBorder);
+					}
+					matrixbutton[i][j].removeMouseListener(layout);
+					matrixbutton[i][j].addMouseListener(this);
+				}
+			movestep = 4;
+		}
+		else
+		{
+			movestep = -2;
+		}
 	}
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1)
@@ -188,7 +233,7 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 						matrixbutton[i][j].removeMouseListener((PetBase)Pets[CurrentActID]);
 						matrixbutton[i][j].addMouseListener(layout);
 					}
-				((PetBase)Pets[CurrentActID]).setMoveStep(0);
+				((PetBase)Pets[CurrentActID]).setMoveStep(-2);
 			}
 			else if(movestep == 1)
 			{
@@ -233,18 +278,19 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 						if(triggered == matrixbutton[i][j])
 							dest = new CoordinateXY(i, j);
 					}
-				movestep = 0;
+				movestep = -2;
 			}
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
 		{
-			if(movestep == 1 || movestep == 3)
+			/*if(movestep == 1 || movestep == 3)
 			{
+				list.clearSelection();
 				list.setBounds(location.getX()*40+40, location.getY()*40, 50, ListItems.length * 20);
 				list.setVisible(true);
 				
 				movestep = 3;
-			}
+			}*/
 		}
 	}
 	
@@ -271,19 +317,19 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
-	}
+	}/*
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
-		// TODO Auto-generated method stub
 		if(list == arg0.getSource())
 		{
 			int index = arg0.getLastIndex();
-			if(CurrentActID == ID && arg0.getValueIsAdjusting())
+			if(CurrentActID == ID && !arg0.getValueIsAdjusting() && selected == false)
 			{
-				
-				System.out.println(ListItems[index]);
+				selected = true;
+				//System.out.println(ListItems[index]);
 				currentAction.skill = action[index].skill;
 				double range = ((SkillList)(currentAction.skill)).getRange();
+				System.out.println(((SkillList)(currentAction.skill)).getName());
 				for(int i=0; i<Pets.length; i++)
 					if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range)
 						((PetBase)(Pets[i])).setTarget(true);
@@ -308,8 +354,8 @@ public abstract class PetBase extends POOPet implements MouseListener, ListSelec
 				}
 			}
 			list.setVisible(false);
-			list.clearSelection();
+			
 		}
 		//list.setVisible(false);
-	}
+	}*/
 }

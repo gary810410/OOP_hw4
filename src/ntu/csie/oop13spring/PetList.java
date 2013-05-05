@@ -25,7 +25,7 @@ class PetMudMonster extends PetBase{
 	}
 	public String getImgPath()
 	{
-		String imgpath = "brown.png";
+		String imgpath = "mud.png";
 		return imgpath;
 	}
 }
@@ -51,7 +51,7 @@ class PetSlime extends PetBase{
 	}
 	public String getImgPath()
 	{
-		String imgpath = "green.png";
+		String imgpath = "slime.png";
 		return imgpath;
 	}
 }
