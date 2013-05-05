@@ -1,5 +1,6 @@
 package ntu.csie.oop13spring;
 
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -9,8 +10,8 @@ import javax.swing.JLayeredPane;
 
 public class Skill_menu implements MouseListener{
 	
-	private static final int width = 80;
-	private static final int height = 10;
+	private static final int width = 100;
+	private static final int height = 15;
 	private JLabel menu;
 	private CoordinateXY location;
 	private PetBase Pet;
@@ -19,6 +20,7 @@ public class Skill_menu implements MouseListener{
 	private boolean activate;
 	private int buttonOutput;
 	private JButton Button;
+	private Font font;
 	
 	public Skill_menu(PetBase pet, String[] skillList, JButton Button,JLayeredPane background)
 	{
@@ -31,9 +33,12 @@ public class Skill_menu implements MouseListener{
 		for(int i=0; i<skillNum; i++)
 		{
 			this.skillList[i] = new JButton(skillList[i]);
-			this.skillList[i].setHorizontalAlignment(JButton.CENTER);
+			this.skillList[i].setHorizontalAlignment(JButton.LEFT);
 			this.skillList[i].setBounds(0, height*i, width, height);
 			this.skillList[i].addMouseListener(this);
+			font = this.skillList[i].getFont();
+			Font labelFont = font.deriveFont((float) 10.0);
+			this.skillList[i].setFont(labelFont);
 			menu.add(this.skillList[i]);
 		}
 		

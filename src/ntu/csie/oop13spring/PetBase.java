@@ -50,11 +50,6 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	private static CoordinateXY dest;
 	private static int CurrentActID;
 	private Skill_menu menu;
-	//private boolean selected;
-	
-	// functional skill
-	
-	//private JList<String> list;
 	
 	public PetBase()
 	{
@@ -96,9 +91,12 @@ public abstract class PetBase extends POOPet implements MouseListener{
 				{
 					currentAction.dest = Pets[i];
 					currentAction.skill.act(currentAction.dest);
-				}
-					
+				}		
 			}
+			for(int i=0; i<this.width/imgwidth; i++)
+				for(int j=0; j<this.height/imgheight; j++)
+					if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
+						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
 		else
 		{
@@ -107,6 +105,10 @@ public abstract class PetBase extends POOPet implements MouseListener{
 				if(((PetBase)Pets[i]).isTargeted() && ((SkillList)(currentAction.skill)).effectSelf())
 					currentAction.skill.act(Pets[i]);
 			}
+			for(int i=0; i<this.width/imgwidth; i++)
+				for(int j=0; j<this.height/imgheight; j++)
+					if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
+						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
 		for(int i=0; i<Pets.length; i++)
 			((PetBase)Pets[i]).setTarget(false);
@@ -137,13 +139,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		itself.addMouseListener(this);
 		background = ((Arena1)arena).getBackground();
 		layout = ((Arena1)arena).getLayoutManager();
-		matrixbutton = layout.getButtons();/*
-		list = new JList<String>(getItemsList());
-		list.setVisible(false);
-		list.addListSelectionListener(this);
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		background.add(list, JLayeredPane.DRAG_LAYER);*/
-		// new
+		matrixbutton = layout.getButtons();
 		menu = new Skill_menu(this, getItemsList(), itself, background);
 		status = new Status_control(getHP(), getMP(), getAGI(), background);
 		statusLabel = status.getStatus();
@@ -162,7 +158,6 @@ public abstract class PetBase extends POOPet implements MouseListener{
 			}
 		}
 		menu.setActivate(false);
-		//movestep = -1;
 		return location;
 	}
 	protected CoordinateXY getLocation()
@@ -214,6 +209,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		}
 		else
 		{
+			dest = location;
 			movestep = -2;
 		}
 	}
@@ -237,7 +233,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 			}
 			else if(movestep == 1)
 			{
-				layout.setCurrentChangePID(ID);
+				//layout.setCurrentChangePID(ID);
 				for(int i=0; i<this.width/imgwidth; i++)
 					for(int j=0; j<this.height/imgheight; j++)
 					{
@@ -276,21 +272,17 @@ public abstract class PetBase extends POOPet implements MouseListener{
 					for(int j=0; j<this.height/imgheight; j++)
 					{
 						if(triggered == matrixbutton[i][j])
+						{
 							dest = new CoordinateXY(i, j);
+							
+						}
 					}
+				
 				movestep = -2;
 			}
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
 		{
-			/*if(movestep == 1 || movestep == 3)
-			{
-				list.clearSelection();
-				list.setBounds(location.getX()*40+40, location.getY()*40, 50, ListItems.length * 20);
-				list.setVisible(true);
-				
-				movestep = 3;
-			}*/
 		}
 	}
 	
@@ -317,45 +309,5 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
-	}/*
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-		if(list == arg0.getSource())
-		{
-			int index = arg0.getLastIndex();
-			if(CurrentActID == ID && !arg0.getValueIsAdjusting() && selected == false)
-			{
-				selected = true;
-				//System.out.println(ListItems[index]);
-				currentAction.skill = action[index].skill;
-				double range = ((SkillList)(currentAction.skill)).getRange();
-				System.out.println(((SkillList)(currentAction.skill)).getName());
-				for(int i=0; i<Pets.length; i++)
-					if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range)
-						((PetBase)(Pets[i])).setTarget(true);
-				if(((SkillList)(action[index].skill)).needAssignPet())
-				{
-					
-					for(int i=0; i<this.width/imgwidth; i++)
-						for(int j=0; j<this.height/imgheight; j++)
-						{
-							if(location.distance(i, j) <= range)
-							{
-								matrixbutton[i][j].setBorder(redBorder);
-							}
-							matrixbutton[i][j].removeMouseListener(layout);
-							matrixbutton[i][j].addMouseListener(this);
-						}
-					movestep = 4;
-				}
-				else
-				{
-					movestep = 0;
-				}
-			}
-			list.setVisible(false);
-			
-		}
-		//list.setVisible(false);
-	}*/
+	}
 }

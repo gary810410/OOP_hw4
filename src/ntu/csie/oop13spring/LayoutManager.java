@@ -22,7 +22,11 @@ public class LayoutManager implements MouseListener{
 	private JButton[] Button;
 	private JLayeredPane background;
 	private JButton[][] matrixbutton;
-	private int currentChangePID;
+	private int[][] floorEffectTime;
+	private int[][] floorEffectCauseBy;
+	private POOSkill[][] floorSkill;
+	private int CurrentPetID;
+	private Icon icon;
 	
 	public LayoutManager(int width, int height, JLayeredPane background)
 	{
@@ -37,11 +41,13 @@ public class LayoutManager implements MouseListener{
 				matrixbutton[i][j].setOpaque(false);
 				matrixbutton[i][j].setContentAreaFilled(false);
 				matrixbutton[i][j].setBounds(i*40, j*40, 40, 40);
-				//this.background.add(matrixbutton[i][j],JLayeredPane.POPUP_LAYER);
 				this.background.add(matrixbutton[i][j], JLayeredPane.PALETTE_LAYER);
 				matrixbutton[i][j].addMouseListener(this);
-				//matrixbutton[i][j].setVisible(false);
 			}
+		floorEffectTime = new int[this.width/imgwidth][this.height/imgheight];
+		floorSkill = new POOSkill[this.width/imgwidth][this.height/imgheight];
+		floorEffectCauseBy = new int[this.width/imgwidth][this.height/imgheight];
+		CurrentPetID = -1;
 	}
 	
 	public void setPetInit(POOPet[] Pets)
@@ -54,13 +60,15 @@ public class LayoutManager implements MouseListener{
 		}
 		Button = new JButton[TotalPet];
 	}
-	
+	public void setCurrentPetID(int ID)
+	{
+		CurrentPetID = ID;
+	}
 	public void setPetButton(JButton petButton, int petID)
 	{
 		Button[petID] = petButton;
 		
 	}
-	
 	public CoordinateXY getPosition(int petID)
 	{
 		return Position[petID];
@@ -77,16 +85,53 @@ public class LayoutManager implements MouseListener{
 	{
 		return matrixbutton;
 	}
-	public void setCurrentChangePID(int ID)
+	
+	// floor effect
+	public void setFloor(SkillList skill, CoordinateXY location)
 	{
-		currentChangePID = ID;
+		floorSkill[location.getX()][location.getY()] = skill;
+		floorEffectTime[location.getX()][location.getY()] = skill.getFloorEffectTime();
+		floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
+		if(skill.GetFloorImg() != null)
+		{
+			icon = new ImageIcon(skill.GetFloorImg());
+			matrixbutton[location.getX()][location.getY()].setIcon(icon);
+		}
+	}
+	public void newRound(int PetID)
+	{
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+			{
+				if(floorEffectCauseBy[i][j] == PetID && floorEffectTime[i][j] > 0)
+				{
+					floorEffectTime[i][j] --;
+					if(floorEffectTime[i][j] == 0)
+					{
+						floorSkill[i][j] = null;
+						floorEffectCauseBy[i][j] = -1;
+						matrixbutton[i][j].setIcon(null);
+					}
+				}
+			}
+	}
+	public void FloorEffect(POOPet pet, CoordinateXY location)
+	{
+		if(floorSkill[location.getX()][location.getY()] != null)
+		{
+			((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
+		}
 	}
 	
+	
+	
+	
+	
+	// main function & event handle
 	public static void main(String[] argv)
 	{
 		ImageJFrame mainFrame = new ImageJFrame("battle game", "grass.png");
 		JLayeredPane background = ((ImageJFrame)mainFrame).getBackGround();
-		//background.setLayout(null);
 		LayoutManager layout = new LayoutManager(800,600, background);
 		mainFrame.setVisible(true);
 		POOPet[] Pets = new POOPet[2];
@@ -95,26 +140,8 @@ public class LayoutManager implements MouseListener{
 		
 	}
 	
-	public void mouseClicked(MouseEvent e) {/*
-		if(e.getButton() == MouseEvent.BUTTON1)
-		{
-			System.out.println("left");
-			Object triggered = e.getSource();
-			for(int i=0; i<this.width/imgwidth; i++)
-				for(int j=0; j<this.height/imgheight; j++)
-				{
-					if(triggered == matrixbutton[i][j])
-					{
-						Position[currentChangePID].setXY(i, j);
-						Button[currentChangePID].setBounds(i*40, j*40, 40, 40);
-					}
-					matrixbutton[i][j].setVisible(false);
-				}
-		}
-		else if(e.getButton() == MouseEvent.BUTTON3)
-		{
-			System.out.println("right");
-		}*/
+	public void mouseClicked(MouseEvent e) {
+		
 	}
 	@Override
 	public void mouseEntered(MouseEvent e) {

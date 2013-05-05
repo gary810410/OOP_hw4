@@ -39,7 +39,6 @@ public class Arena1 extends POOArena{
 		background = mainFrame.getBackGround();
 		background.setLayout(null);
 		layout = new LayoutManager(800, 600, background);
-		//background.addActionListener()
 		
 
 		// set pets
@@ -53,8 +52,6 @@ public class Arena1 extends POOArena{
 			position[i] = layout.getPosition(i);
 			((PetBase)Pets[i]).setALL(position[i], Button[i], i, this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
-			//layout.setPetButton(Button[i], i);
-			//background.add(Button[i], JLayeredPane.PALETTE_LAYER);
 			background.add(Button[i], JLayeredPane.POPUP_LAYER);
 		}
         mainFrame.setVisible(true);
@@ -64,6 +61,9 @@ public class Arena1 extends POOArena{
 	{
 		for(int i=0; i<TotalPetNumber; i++)
 		{
+			layout.setCurrentPetID(i);
+			layout.newRound(i);
+			layout.FloorEffect(Pets[i], ((PetBase)Pets[i]).getLocation());
 			Button[i].setBorder(activeBorder);
 			getPosition(Pets[i]);
 			Pets[i].act(this);
