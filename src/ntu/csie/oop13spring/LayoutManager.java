@@ -94,7 +94,8 @@ public class LayoutManager implements MouseListener{
 		floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
 		if(skill.GetFloorImg() != null)
 		{
-			icon = new ImageIcon(skill.GetFloorImg());
+			TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
+			icon = TIcon.getIcon();
 			matrixbutton[location.getX()][location.getY()].setIcon(icon);
 		}
 	}

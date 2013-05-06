@@ -1,6 +1,5 @@
 package ntu.csie.oop13spring;
 
-
 import javax.swing.*;
 
 public class ImageButton{
@@ -11,12 +10,14 @@ public class ImageButton{
 	
 	public ImageButton(String imgpath)
 	{
-		icon = new ImageIcon(imgpath);
+		TransparentIcon TIcon = new TransparentIcon(imgpath);
+		icon = TIcon.getIcon();
 		object = new JButton(icon);
+		object.setOpaque(false);
+		object.setContentAreaFilled(false);
 	}
 	public JButton getButton()
 	{
 		return object;
 	}
-	
 }

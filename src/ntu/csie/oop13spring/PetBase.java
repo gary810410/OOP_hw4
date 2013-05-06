@@ -51,11 +51,15 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	private static int CurrentActID;
 	private Skill_menu menu;
 	
+	protected int MAXhp;
+	protected int MAXmp;
+	protected int MAXagi;
+	
 	public PetBase()
 	{
-		setHP(1);
-		setMP(1);
-		setAGI(1);
+		MAXhp = 1; setHP(1);
+		MAXmp = 1; setMP(1);
+		MAXagi = 1;setAGI(1);
 		action = new POOAction[2];
 		action[0] = new POOAction();
 		action[0].skill = new ActionTinyAttack();
@@ -90,7 +94,8 @@ public abstract class PetBase extends POOPet implements MouseListener{
 				if(dest.distance(((PetBase)Pets[i]).getLocation()) <= ((SkillList)(currentAction.skill)).getSplashRange())
 				{
 					currentAction.dest = Pets[i];
-					currentAction.skill.act(currentAction.dest);
+					if(i !=  ID || ((SkillList)(currentAction.skill)).effectSelf())
+						currentAction.skill.act(currentAction.dest);
 				}		
 			}
 			for(int i=0; i<this.width/imgwidth; i++)
@@ -102,7 +107,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		{
 			for(int i=0; i<Pets.length; i++)
 			{
-				if(((PetBase)Pets[i]).isTargeted() && ((SkillList)(currentAction.skill)).effectSelf())
+				if(((PetBase)Pets[i]).isTargeted())
 					currentAction.skill.act(Pets[i]);
 			}
 			for(int i=0; i<this.width/imgwidth; i++)
@@ -111,7 +116,10 @@ public abstract class PetBase extends POOPet implements MouseListener{
 						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
 		for(int i=0; i<Pets.length; i++)
+		{
 			((PetBase)Pets[i]).setTarget(false);
+			((PetBase)Pets[i]).setStatus();
+		}
 		for(int i=0; i<this.width/imgwidth; i++)
 			for(int j=0; j<this.height/imgheight; j++)
 			{
@@ -119,7 +127,6 @@ public abstract class PetBase extends POOPet implements MouseListener{
 				matrixbutton[i][j].removeMouseListener(this);
 				matrixbutton[i][j].addMouseListener(layout);
 			}
-		
 		//selected=false;
 		
 		movestep = -1;
@@ -141,7 +148,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		layout = ((Arena1)arena).getLayoutManager();
 		matrixbutton = layout.getButtons();
 		menu = new Skill_menu(this, getItemsList(), itself, background);
-		status = new Status_control(getHP(), getMP(), getAGI(), background);
+		status = new Status_control(getMAXhp(), getMAXmp(), getMAXagi(), background);
 		statusLabel = status.getStatus();
 	}
 	protected POOCoordinate move(POOArena arena)
@@ -184,13 +191,31 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	{
 		return targeted;
 	}
+	public void setStatus()
+	{
+		status.set_status(getHP(), getMP(), getAGI());
+	}
+	public int getMAXhp()
+	{
+		return MAXhp;
+	}
+	public int getMAXmp()
+	{
+		return MAXmp;
+	}
+	public int getMAXagi()
+	{
+		return MAXagi;
+	}
+	
 	public void setActionNum(int num)
 	{
 		currentAction.skill = action[num].skill;
+		setMP(getMP() - ((SkillList)(currentAction.skill)).getMPcost());
 		double range = ((SkillList)(currentAction.skill)).getRange();
 		System.out.println(((SkillList)(currentAction.skill)).getName());
 		for(int i=0; i<Pets.length; i++)
-			if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range)
+			if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range && (i != ID  || ((SkillList)(currentAction.skill)).effectSelf()))
 				((PetBase)(Pets[i])).setTarget(true);
 		if(((SkillList)(action[num].skill)).needAssignPet())
 		{
@@ -291,7 +316,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	public void mouseEntered(MouseEvent e) {
 		if(e.getSource() == itself )
 		{
-			status.set_status(getHP(), getMP(), getAGI());
+			setStatus();
 			status.set_location(location.getX()*40-20, location.getY()*40-30);
 			statusLabel.setVisible(true);
 		}

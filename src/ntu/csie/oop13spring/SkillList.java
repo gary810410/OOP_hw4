@@ -9,8 +9,11 @@ public class SkillList extends POOSkill{
 	protected String name;
 	protected int floorEffectTime;
 	protected String floorEffectImgPath;
+	protected int MPcost;
+	
 	public SkillList()
 	{
+		MPcost = 0;
 		range = 0;
 		needAssignPet = false;
 		effectSelf = true;
@@ -24,7 +27,10 @@ public class SkillList extends POOSkill{
 	@Override
 	public void act(POOPet pet) {
 		// TODO Auto-generated method stub
-		;
+		if(pet.getMP() < ((PetBase)pet).getMAXmp())
+			pet.setMP(pet.getMP()+1);
+		if(pet.getAGI() < ((PetBase)pet).getMAXagi())
+			pet.setAGI(pet.getAGI()+1);
 	}
 	
 	// set floor action
@@ -62,7 +68,10 @@ public class SkillList extends POOSkill{
 	{
 		return floorEffectTime;
 	}
-	
+	public int getMPcost()
+	{
+		return MPcost;
+	}
 }
 
 class ActionTinyAttack extends SkillList{
@@ -90,9 +99,10 @@ class ActionMudSplash extends SkillList{
 	
 	public ActionMudSplash()
 	{
+		MPcost = 2;
 		range = 2;
 		needAssignPet = true;
-		effectSelf = true;
+		effectSelf = false;
 		splashrange = 1;
 		name = "Mud";
 		floorEffectTime = 1;
@@ -105,9 +115,6 @@ class ActionMudSplash extends SkillList{
 			int hp = pet.getHP();
 			if(hp > 0)
 				pet.setHP(hp -1);
-			//int agi = pet.getAGI();
-			//if(agi > 0)
-			//	pet.setAGI(agi -1);
 		}
 	}
 	public void FloorEffect(POOPet pet)
@@ -122,11 +129,14 @@ class ActionFongi extends SkillList{
 	
 	public ActionFongi()
 	{
+		MPcost = 1;
 		range = 3;
 		needAssignPet = true;
 		effectSelf = true;
 		splashrange = 0;
 		name = "Fongi";
+		floorEffectTime = 1;
+		floorEffectImgPath = "green.png";
 	}
 	public void act(POOPet pet)
 	{

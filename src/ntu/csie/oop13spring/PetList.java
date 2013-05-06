@@ -7,9 +7,9 @@ public class PetList extends PetBase{
 class PetMudMonster extends PetBase{
 	public PetMudMonster()
 	{
-		setHP(6);
-		setMP(2);
-		setAGI(3);
+		MAXhp = 6; setHP(6);
+		MAXmp = 4; setMP(3);
+		MAXagi = 4;setAGI(3);
 		action = new POOAction[3];
 		action[0] = new POOAction();
 		action[0].skill = new ActionTinyAttack();
@@ -33,9 +33,9 @@ class PetMudMonster extends PetBase{
 class PetSlime extends PetBase{
 	public PetSlime()
 	{
-		setHP(5);
-		setMP(1);
-		setAGI(4);
+		MAXhp = 5; setHP(5);
+		MAXmp = 4; setMP(2);
+		MAXagi = 5;setAGI(4);
 		action = new POOAction[3];
 		action[0] = new POOAction();
 		action[0].skill = new ActionTinyAttack();
