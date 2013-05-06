@@ -18,9 +18,9 @@ public class Skill_menu implements MouseListener{
 	private JButton[] skillList;
 	private int skillNum;
 	private boolean activate;
-	private int buttonOutput;
 	private JButton Button;
 	private Font font;
+	boolean visible;
 	
 	public Skill_menu(PetBase pet, String[] skillList, JButton Button,JLayeredPane background)
 	{
@@ -46,7 +46,7 @@ public class Skill_menu implements MouseListener{
 		menu.setVisible(false);
 		this.Button = Button;
 		this.Button.addMouseListener(this);
-		
+		visible = false;
 		location = new CoordinateXY(0,0);
 	}
 	public void setActivate(boolean b)
@@ -62,6 +62,10 @@ public class Skill_menu implements MouseListener{
 	{
 		return menu;
 	}
+	public void setvisible(boolean b)
+	{
+		visible = b;
+	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -74,17 +78,30 @@ public class Skill_menu implements MouseListener{
 					{
 						if(e.getSource() == skillList[i])
 						{
-							buttonOutput = i;
-							((PetBase)Pet).setActionNum(buttonOutput);
+							if(((PetBase)Pet).setActionNum(i))
+							{
+								visible = false;
+								menu.setVisible(false);
+							}
 						}
 					}
-				menu.setVisible(false);
 			}
 			else if(e.getButton() == MouseEvent.BUTTON3 && activate)
 			{
-				location = Pet.getLocation();
-				menu.setBounds(location.getX()*40+40, location.getY()*40, width, height*skillNum);
-				menu.setVisible(true);
+				if(visible)
+				{
+					menu.setVisible(false);
+					visible = false;
+				}
+				else
+				{
+					location = Pet.getLocation();
+					menu.setBounds(location.getX()*40+40, location.getY()*40, width, height*skillNum);
+					menu.setVisible(true);
+					((PetBase)Pet).setMoveStep(2);
+					visible = true;
+				}
+				
 			}
 		}
 	}

@@ -89,14 +89,20 @@ public class LayoutManager implements MouseListener{
 	// floor effect
 	public void setFloor(SkillList skill, CoordinateXY location)
 	{
-		floorSkill[location.getX()][location.getY()] = skill;
-		floorEffectTime[location.getX()][location.getY()] = skill.getFloorEffectTime();
-		floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
-		if(skill.GetFloorImg() != null)
+		if(skill.isFloorSkill())
 		{
-			TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
-			icon = TIcon.getIcon();
-			matrixbutton[location.getX()][location.getY()].setIcon(icon);
+			floorSkill[location.getX()][location.getY()] = skill;
+			floorEffectTime[location.getX()][location.getY()] = skill.getFloorEffectTime();
+			floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
+			if(skill.GetFloorImg() != null)
+			{
+				TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
+				icon = TIcon.getIcon();
+				matrixbutton[location.getX()][location.getY()].setIcon(icon);
+			}else
+			{
+				matrixbutton[location.getX()][location.getY()].setIcon(null);
+			}
 		}
 	}
 	public void newRound(int PetID)
@@ -123,7 +129,13 @@ public class LayoutManager implements MouseListener{
 			((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
 		}
 	}
-	
+	public int exitCost(CoordinateXY location)
+	{
+		int cost = 1;
+		if(floorSkill[location.getX()][location.getY()] != null)
+			cost += ((SkillList)(floorSkill[location.getX()][location.getY()])).getSlowDown();
+		return cost;
+	}
 	
 	
 	

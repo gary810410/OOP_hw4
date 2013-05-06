@@ -1,8 +1,11 @@
 package ntu.csie.oop13spring;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
@@ -16,7 +19,7 @@ import javax.swing.border.MatteBorder;
 //import javax.swing.event.ListSelectionEvent;
 //import javax.swing.event.ListSelectionListener;
 
-public abstract class PetBase extends POOPet implements MouseListener{
+public  abstract class PetBase extends POOPet implements MouseListener, KeyListener{
 	
 	
 	protected int imgwidth = 40;
@@ -50,6 +53,8 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	private static CoordinateXY dest;
 	private static int CurrentActID;
 	private Skill_menu menu;
+	private MovingStatus moveList;
+	private int AGIused;
 	
 	protected int MAXhp;
 	protected int MAXmp;
@@ -68,6 +73,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		currentAction = new POOAction();
 		targeted = false;
 		movestep = -1;
+		moveList = new MovingStatus();
 	}
 	public String getImgPath()
 	{
@@ -76,17 +82,16 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	}
 	protected POOAction act(POOArena arena)
 	{
-		if(movestep == 0)
-			movestep = 3;
-		menu.setActivate(true);
 		CurrentActID = ID;
-		while(movestep != -2)
+		
+		while(movestep != 4)
 		{
 			try{
 			TimeUnit.MICROSECONDS.sleep(100);
 			}catch(Exception e){}
 		}
-		menu.setActivate(false);
+		resetMatrixButton();
+		// do skill action
 		if(((SkillList)(currentAction.skill)).needAssignPet())
 		{
 			for(int i=0; i<Pets.length; i++)
@@ -98,23 +103,21 @@ public abstract class PetBase extends POOPet implements MouseListener{
 						currentAction.skill.act(currentAction.dest);
 				}		
 			}
-			for(int i=0; i<this.width/imgwidth; i++)
-				for(int j=0; j<this.height/imgheight; j++)
-					if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
-						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
 		else
 		{
 			for(int i=0; i<Pets.length; i++)
-			{
 				if(((PetBase)Pets[i]).isTargeted())
 					currentAction.skill.act(Pets[i]);
-			}
-			for(int i=0; i<this.width/imgwidth; i++)
-				for(int j=0; j<this.height/imgheight; j++)
-					if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
-						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
+		
+		// set floor effect
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+				if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
+					layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
+		
+		// reset for the next pet
 		for(int i=0; i<Pets.length; i++)
 		{
 			((PetBase)Pets[i]).setTarget(false);
@@ -127,8 +130,6 @@ public abstract class PetBase extends POOPet implements MouseListener{
 				matrixbutton[i][j].removeMouseListener(this);
 				matrixbutton[i][j].addMouseListener(layout);
 			}
-		//selected=false;
-		
 		movestep = -1;
 		return action[1];
 	}
@@ -144,6 +145,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 		itself = it;
 		Pets = ((Arena1)arena).getPets();
 		itself.addMouseListener(this);
+		itself.addKeyListener(this);
 		background = ((Arena1)arena).getBackground();
 		layout = ((Arena1)arena).getLayoutManager();
 		matrixbutton = layout.getButtons();
@@ -155,6 +157,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	{
 		movestep = 1;
 		menu.setActivate(true);
+		AGIused = 0;
 		CurrentActID = ID;
 		while(movestep == 1 || movestep == 2)
 		{
@@ -207,13 +210,42 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	{
 		return MAXagi;
 	}
-	
-	public void setActionNum(int num)
+	public int getAGIused()
+	{
+		return AGIused;
+	}
+	public void setMatrixButton()
+	{
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+			{
+				if(location.distance(i, j) <= this.getAGI()-AGIused)
+				{
+					matrixbutton[i][j].setBorder(blueBorder);
+				}
+				matrixbutton[i][j].removeMouseListener(layout);
+				matrixbutton[i][j].addMouseListener(this);
+			}
+	}
+	public void resetMatrixButton()
+	{
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+			{
+				matrixbutton[i][j].setBorder(defaultBorder);
+				matrixbutton[i][j].removeMouseListener(this);
+				matrixbutton[i][j].addMouseListener(layout);
+			}
+	}
+	public boolean setActionNum(int num)
 	{
 		currentAction.skill = action[num].skill;
+		if(getMP() < ((SkillList)(currentAction.skill)).getMPcost())
+			return false;
 		setMP(getMP() - ((SkillList)(currentAction.skill)).getMPcost());
 		double range = ((SkillList)(currentAction.skill)).getRange();
 		System.out.println(((SkillList)(currentAction.skill)).getName());
+		resetMatrixButton();
 		for(int i=0; i<Pets.length; i++)
 			if(location.distance(((PetBase)(Pets[i])).getLocation()) <= range && (i != ID  || ((SkillList)(currentAction.skill)).effectSelf()))
 				((PetBase)(Pets[i])).setTarget(true);
@@ -230,13 +262,14 @@ public abstract class PetBase extends POOPet implements MouseListener{
 					matrixbutton[i][j].removeMouseListener(layout);
 					matrixbutton[i][j].addMouseListener(this);
 				}
-			movestep = 4;
+			movestep = 3;
 		}
 		else
 		{
 			dest = location;
-			movestep = -2;
+			movestep = 4;
 		}
+		return true;
 	}
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1)
@@ -254,41 +287,13 @@ public abstract class PetBase extends POOPet implements MouseListener{
 						matrixbutton[i][j].removeMouseListener((PetBase)Pets[CurrentActID]);
 						matrixbutton[i][j].addMouseListener(layout);
 					}
-				((PetBase)Pets[CurrentActID]).setMoveStep(-2);
+				((PetBase)Pets[CurrentActID]).setMoveStep(4);
 			}
 			else if(movestep == 1)
 			{
-				//layout.setCurrentChangePID(ID);
-				for(int i=0; i<this.width/imgwidth; i++)
-					for(int j=0; j<this.height/imgheight; j++)
-					{
-						if(location.distance(i, j) <= this.getAGI())
-						{
-							matrixbutton[i][j].setBorder(blueBorder);
-						}
-						matrixbutton[i][j].removeMouseListener(layout);
-						matrixbutton[i][j].addMouseListener(this);
-					}
-				movestep = 2;
+				setMatrixButton();
 			}
-			else if(movestep == 2)
-			{
-				Object triggered = e.getSource();
-				for(int i=0; i<this.width/imgwidth; i++)
-					for(int j=0; j<this.height/imgheight; j++)
-					{
-						if((JButton)triggered == matrixbutton[i][j])
-						{
-							location.setXY(i, j);
-							itself.setBounds(i*40, j*40, 40, 40);
-						}
-						matrixbutton[i][j].setBorder(defaultBorder);
-						matrixbutton[i][j].removeMouseListener(this);
-						matrixbutton[i][j].addMouseListener(layout);
-					}
-				movestep = 0;
-			}
-			else if(movestep == 4)
+			else if(movestep == 3)
 			{
 				Object triggered = e.getSource();
 				if(triggered == itself)
@@ -302,8 +307,7 @@ public abstract class PetBase extends POOPet implements MouseListener{
 							
 						}
 					}
-				
-				movestep = -2;
+				movestep = 4;
 			}
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
@@ -335,4 +339,169 @@ public abstract class PetBase extends POOPet implements MouseListener{
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
 	}
+	
+	// for key listener
+	public void keyPressed(KeyEvent e) {
+		int exitCost = layout.exitCost(location);
+		if(CurrentActID == ID && movestep == 1)
+		{
+			if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+			{
+				
+				StatusObject obj;
+				obj = moveList.back();
+				if(obj != null)
+				{
+					setHP(obj.getHP());
+					setMP(obj.getMP());
+					setAGI(obj.getAGI());
+					location = obj.getLocation();
+					AGIused = obj.getAGIused();
+					itself.setBounds(location.getX()*40, location.getY()*40, imgwidth, imgheight);
+					resetMatrixButton();
+					setMatrixButton();
+				}
+			}
+		}
+		if(CurrentActID == ID && movestep == 1 && AGIused+exitCost <= getAGI())
+		{
+			boolean cover = false;
+			if (e.getKeyCode() == KeyEvent.VK_LEFT && location.getX()-1 >= 0)
+			{
+	            CoordinateXY next = new CoordinateXY(location.getX()-1, location.getY());
+	        	for(int i=0; i<Pets.length; i++)
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        			cover = true;
+	        	if(cover == false)
+	        	{
+	        		moveList.add(location, getHP(), getMP(), getAGI(), AGIused);
+	        		location.setXY(location.getX()-1, location.getY());
+	        		layout.FloorEffect(this, location);
+	        		AGIused += exitCost;
+	        	}
+	        }
+			else if (e.getKeyCode() == KeyEvent.VK_RIGHT && location.getX()+1 < width/imgwidth)
+	        {
+	        	CoordinateXY next = new CoordinateXY(location.getX()+1, location.getY());
+	        	for(int i=0; i<Pets.length; i++)
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        			cover = true;
+	        	if(cover == false)
+	        	{
+	        		moveList.add(location, getHP(), getMP(), getAGI(), AGIused);
+	        		location.setXY(location.getX()+1, location.getY());
+	        		layout.FloorEffect(this, location);
+	        		AGIused += exitCost;
+	        	}
+	        }
+			else if (e.getKeyCode() == KeyEvent.VK_UP && location.getY()-1 >= 0)
+	        {
+	        	CoordinateXY next = new CoordinateXY(location.getX(), location.getY()-1);
+	        	for(int i=0; i<Pets.length; i++)
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        			cover = true;
+	        	if(cover == false)
+	        	{
+	        		moveList.add(location, getHP(), getMP(), getAGI(), AGIused);
+	        		location.setXY(location.getX(), location.getY()-1);
+	        		layout.FloorEffect(this, location);
+	        		AGIused += exitCost;
+	        	}
+	        }
+			else if (e.getKeyCode() == KeyEvent.VK_DOWN && location.getY()+1 < height/imgheight) {
+	        	CoordinateXY next = new CoordinateXY(location.getX()-1, location.getY()+1);
+	        	for(int i=0; i<Pets.length; i++)
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        			cover = true;
+	        	if(cover == false)
+	        	{
+	        		moveList.add(location, getHP(), getMP(), getAGI(), AGIused);
+	        		location.setXY(location.getX(), location.getY()+1);
+	        		layout.FloorEffect(this, location);
+	        		AGIused += exitCost;
+	        	}
+	        }
+			itself.setBounds(location.getX()*40, location.getY()*40, imgwidth, imgheight);
+			resetMatrixButton();
+			setMatrixButton();
+		}
+		
+    }
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		// nothing
+	}
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		// nothing
+	}
 }
+
+// status object
+class StatusObject
+{
+	private CoordinateXY location;
+	int hp; int mp; int agi; int agiused;
+	StatusObject(CoordinateXY location, int hp, int mp, int agi, int agiused)
+	{
+		this.location = new CoordinateXY(location.getX(), location.getY());
+		this.hp = hp;
+		this.mp = mp;
+		this.agi = agi;
+		this.agiused = agiused;
+	}
+	public CoordinateXY getLocation()
+	{
+		return this.location;
+	}
+	public int getHP()
+	{
+		return this.hp;
+	}
+	public int getMP()
+	{
+		return this.mp;
+	}
+	public int getAGI()
+	{
+		return this.agi;
+	}
+	public int getAGIused()
+	{
+		return this.agiused;
+	}
+	
+}
+
+// move status
+class MovingStatus{
+	
+	
+	private LinkedList<StatusObject> linkedList;
+	private StatusObject status;
+	public MovingStatus()
+	{
+		linkedList = new LinkedList<StatusObject>();
+	}
+	public void add(CoordinateXY location, int hp, int mp, int agi, int agiused)
+	{
+		status = new StatusObject(location,hp,mp,agi, agiused);
+		linkedList.addLast(status);
+	}
+	public StatusObject back()
+	{
+		if(!linkedList.isEmpty())
+		{
+			status = linkedList.getLast();
+			linkedList.removeLast();
+		}
+		else
+		{
+			status = null;
+		}
+		return status;
+	}
+}
+

@@ -10,6 +10,8 @@ public class SkillList extends POOSkill{
 	protected int floorEffectTime;
 	protected String floorEffectImgPath;
 	protected int MPcost;
+	protected int floorSlowDownSpeed;
+	protected boolean floorSkill;
 	
 	public SkillList()
 	{
@@ -21,6 +23,8 @@ public class SkillList extends POOSkill{
 		name = "wait";
 		floorEffectTime = 0;
 		floorEffectImgPath = null;
+		floorSlowDownSpeed = 0;
+		floorSkill = false;
 	}
 	
 	// set normal action
@@ -29,7 +33,7 @@ public class SkillList extends POOSkill{
 		// TODO Auto-generated method stub
 		if(pet.getMP() < ((PetBase)pet).getMAXmp())
 			pet.setMP(pet.getMP()+1);
-		if(pet.getAGI() < ((PetBase)pet).getMAXagi())
+		if(pet.getAGI() < ((PetBase)pet).getMAXagi() && ((PetBase)pet).getAGIused() == 0)
 			pet.setAGI(pet.getAGI()+1);
 	}
 	
@@ -72,6 +76,14 @@ public class SkillList extends POOSkill{
 	{
 		return MPcost;
 	}
+	public int getSlowDown()
+	{
+		return floorSlowDownSpeed;
+	}
+	public boolean isFloorSkill()
+	{
+		return floorSkill;
+	}
 }
 
 class ActionTinyAttack extends SkillList{
@@ -99,6 +111,7 @@ class ActionMudSplash extends SkillList{
 	
 	public ActionMudSplash()
 	{
+		floorSkill = true;
 		MPcost = 2;
 		range = 2;
 		needAssignPet = true;
@@ -106,6 +119,7 @@ class ActionMudSplash extends SkillList{
 		splashrange = 1;
 		name = "Mud";
 		floorEffectTime = 1;
+		floorSlowDownSpeed = 1;
 		floorEffectImgPath = "brown.png";
 	}
 	public void act(POOPet pet)
@@ -119,9 +133,9 @@ class ActionMudSplash extends SkillList{
 	}
 	public void FloorEffect(POOPet pet)
 	{
-		int agi = pet.getAGI();
-		if(agi > 0)
-			pet.setAGI(agi -1);
+		//int agi = pet.getAGI();
+		//if(agi > 0)
+		//	pet.setAGI(agi -1);
 	}
 }
 
