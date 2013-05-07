@@ -55,6 +55,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	private Skill_menu menu;
 	private MovingStatus moveList;
 	private int AGIused;
+	private boolean alive;
 	
 	protected int MAXhp;
 	protected int MAXmp;
@@ -74,10 +75,24 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 		targeted = false;
 		movestep = -1;
 		moveList = new MovingStatus();
+		alive = true;
+	}
+	public boolean checkAlive()
+	{
+		return alive;
+	}
+	public void setRIP()
+	{
+		alive = false;
 	}
 	public String getImgPath()
 	{
 		String imgpath = "black.png";
+		return imgpath;
+	}
+	public String getDeathImg()
+	{
+		String imgpath = "RIP.png";
 		return imgpath;
 	}
 	protected POOAction act(POOArena arena)
@@ -222,6 +237,10 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	public POOPet getCurrentPet()
 	{
 		return Pets[CurrentActID];
+	}
+	public JLayeredPane getBackGround()
+	{
+		return background;
 	}
 	public void setMatrixButton()
 	{
@@ -379,7 +398,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 			{
 	            CoordinateXY next = new CoordinateXY(location.getX()-1, location.getY());
 	        	for(int i=0; i<Pets.length; i++)
-	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()) && ((PetBase)Pets[i]).checkAlive())
 	        			cover = true;
 	        	if(cover == false)
 	        	{
@@ -393,7 +412,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	        {
 	        	CoordinateXY next = new CoordinateXY(location.getX()+1, location.getY());
 	        	for(int i=0; i<Pets.length; i++)
-	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()) && ((PetBase)Pets[i]).checkAlive())
 	        			cover = true;
 	        	if(cover == false)
 	        	{
@@ -407,7 +426,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	        {
 	        	CoordinateXY next = new CoordinateXY(location.getX(), location.getY()-1);
 	        	for(int i=0; i<Pets.length; i++)
-	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()) && ((PetBase)Pets[i]).checkAlive())
 	        			cover = true;
 	        	if(cover == false)
 	        	{
@@ -418,9 +437,9 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	        	}
 	        }
 			else if (e.getKeyCode() == KeyEvent.VK_DOWN && location.getY()+1 < height/imgheight) {
-	        	CoordinateXY next = new CoordinateXY(location.getX()-1, location.getY()+1);
+	        	CoordinateXY next = new CoordinateXY(location.getX(), location.getY()+1);
 	        	for(int i=0; i<Pets.length; i++)
-	        		if(next.equals(((PetBase)Pets[i]).getLocation()))
+	        		if(next.equals(((PetBase)Pets[i]).getLocation()) && ((PetBase)Pets[i]).checkAlive())
 	        			cover = true;
 	        	if(cover == false)
 	        	{

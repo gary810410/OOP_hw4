@@ -1,5 +1,7 @@
 package ntu.csie.oop13spring;
 
+import javax.swing.JLayeredPane;
+
 public class SkillList extends POOSkill{
 
 	protected String AttackImage;
@@ -43,6 +45,7 @@ public class SkillList extends POOSkill{
 			pet.setMP(pet.getMP()+1);
 		if(pet.getAGI() < ((PetBase)pet).getMAXagi() && ((PetBase)pet).getAGIused() == 0)
 			pet.setAGI(pet.getAGI()+1);
+		checkAlive(pet);
 	}
 	
 	// set floor action
@@ -108,6 +111,18 @@ public class SkillList extends POOSkill{
 	{
 		return floorSkill;
 	}
+	public void checkAlive(POOPet pet)
+	{
+		int hp = pet.getHP();
+		if(hp <= 0)
+		{
+			TransparentIcon TIcon = new TransparentIcon(((PetBase)pet).getDeathImg());
+			JLayeredPane background = ((PetBase)pet).getBackGround();
+			background.setLayer(((PetBase)pet).getitself(), JLayeredPane.MODAL_LAYER);
+			((PetBase)pet).getitself().setIcon(TIcon.getIcon());
+			((PetBase)pet).setRIP();
+		}
+	}
 }
 
 class ActionTinyAttack extends SkillList{
@@ -129,6 +144,7 @@ class ActionTinyAttack extends SkillList{
 			int hp = pet.getHP();
 	        if (hp > 0)
 	            pet.setHP(hp - 1);
+	        checkAlive(pet);
 		}
 	}
 }
@@ -157,7 +173,11 @@ class ActionMudSplash extends SkillList{
 		{
 			int hp = pet.getHP();
 			if(hp > 0)
-				pet.setHP(hp -1);
+				pet.setHP(hp -2);
+			int agi = pet.getAGI();
+			if(agi > 0)
+				pet.setAGI(agi -1);
+			checkAlive(pet);
 		}
 	}
 	public void FloorEffect(POOPet pet)
@@ -188,6 +208,7 @@ class ActionFongi extends SkillList{
 			int agi = pet.getAGI();
 			if(agi > 0)
 				pet.setAGI(agi -2);
+			checkAlive(pet);
 		}
 	}
 }
@@ -216,7 +237,7 @@ class ActionSilking extends SkillList
 		{
 			int mp = pet.getMP();
 			if(mp > 0)
-				pet.setMP(mp -1);
+				pet.setMP(mp -2);
 			int agi = pet.getAGI();
 			if(agi > 0)
 				pet.setAGI(agi -2);

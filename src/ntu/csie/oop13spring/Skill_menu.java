@@ -90,8 +90,10 @@ public class Skill_menu implements MouseListener{
 			{
 				if(visible)
 				{
+					System.out.println("again");
 					menu.setVisible(false);
 					visible = false;
+					((PetBase)Pet).setMoveStep(1);
 				}
 				else
 				{

@@ -23,13 +23,20 @@ public class Arena1 extends POOArena{
 	public static final MatteBorder activeBorder = new MatteBorder(3,3,3,3,activeColor);
 	public static final Color defaultColor = new Color(0,0,0);
 	public static final MatteBorder defaultBorder = new MatteBorder(0,0,0,0,defaultColor);
+	private boolean ready;
 	
 	public Arena1() throws IOException
 	{
-		//Pets = getAllPets();
-		Pets = new POOPet[2];
-		Pets[0] = new PetSpider();
-		Pets[1] = new PetMudMonster();
+		
+		//Pets = new POOPet[2];
+		//Pets[0] = new PetSpider();
+		//Pets[1] = new PetMudMonster();
+		ready = false;
+		
+	}
+	public void setPets()
+	{
+		Pets = getAllPets();
 		TotalPetNumber = Pets.length;
 		PetImg = new ImageButton[TotalPetNumber];
 		
@@ -47,27 +54,35 @@ public class Arena1 extends POOArena{
 		Button = new JButton[TotalPetNumber];
 		for(int i=0; i<TotalPetNumber; i++)
 		{
+			
 			PetImg[i] = new ImageButton(((PetBase)Pets[i]).getImgPath());
 			Button[i] = PetImg[i].getButton();
 			position[i] = layout.getPosition(i);
 			((PetBase)Pets[i]).setALL(position[i], Button[i], i, this);
 			Button[i].setBounds(layout.getXPosition(i),layout.getYPosition(i),40,40);
 			background.add(Button[i], JLayeredPane.POPUP_LAYER);
+			
 		}
         mainFrame.setVisible(true);
+        ready = true;
 	}
 	
 	public boolean fight()
 	{
+		if(ready == false)
+			setPets();
 		for(int i=0; i<TotalPetNumber; i++)
 		{
-			layout.setCurrentPetID(i);
-			layout.newRound(i);
-			layout.FloorEffect(Pets[i], ((PetBase)Pets[i]).getLocation());
-			Button[i].setBorder(activeBorder);
-			getPosition(Pets[i]);
-			Pets[i].act(this);
-			Button[i].setBorder(defaultBorder);
+			if(((PetBase)Pets[i]).checkAlive())
+			{
+				layout.setCurrentPetID(i);
+				layout.newRound(i);
+				layout.FloorEffect(Pets[i], ((PetBase)Pets[i]).getLocation());
+				Button[i].setBorder(activeBorder);
+				getPosition(Pets[i]);
+				Pets[i].act(this);
+				Button[i].setBorder(defaultBorder);
+			}
 		}
 		return true;
 	}
