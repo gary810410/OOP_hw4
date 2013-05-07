@@ -1,12 +1,18 @@
 package ntu.csie.oop13spring;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 
-public class Arena1 extends POOArena{
+public class Arena1 extends POOArena implements MouseListener, KeyListener{
 	
 	private POOPet[] Pets;
 	private CoordinateXY[] position;
@@ -17,13 +23,14 @@ public class Arena1 extends POOArena{
 	private LayoutManager layout;
 	private static int TotalPetNumber;
 	private int currentPetID;
-	
+	private JButton start;
 	// boarder color
 	public static final Color activeColor = new Color(225,127,39);
 	public static final MatteBorder activeBorder = new MatteBorder(3,3,3,3,activeColor);
 	public static final Color defaultColor = new Color(0,0,0);
 	public static final MatteBorder defaultBorder = new MatteBorder(0,0,0,0,defaultColor);
 	private boolean ready;
+	private int gameStep;
 	
 	public Arena1() throws IOException
 	{
@@ -32,6 +39,7 @@ public class Arena1 extends POOArena{
 		//Pets[0] = new PetSpider();
 		//Pets[1] = new PetMudMonster();
 		ready = false;
+		gameStep = 0;
 		
 	}
 	public void setPets()
@@ -41,12 +49,38 @@ public class Arena1 extends POOArena{
 		PetImg = new ImageButton[TotalPetNumber];
 		
 		
+		
 		// main frame
 		mainFrame = new ImageJFrame("battle game", "grass.png");
 		background = mainFrame.getBackGround();
 		background.setLayout(null);
 		layout = new LayoutManager(800, 600, background);
+		mainFrame.setVisible(true);
 		
+		// Start menu
+		start = new JButton("Game Start");
+		start.setBounds(0, 0, 800, 600);
+		Font font = start.getFont();
+		Font labelFont = font.deriveFont((float) 40.0);
+		start.setFont(labelFont);
+		start.setHorizontalAlignment(JLabel.CENTER);
+		start.setVerticalAlignment(JLabel.CENTER);
+		start.setBorder(defaultBorder);
+		start.setOpaque(false);
+		start.setContentAreaFilled(false);
+		start.setBorderPainted(false);
+		start.addKeyListener(this);
+		start.addMouseListener(this);
+		background.add(start, new Integer(1000));
+		while(gameStep == 0)
+		{
+			try{
+				TimeUnit.MICROSECONDS.sleep(100);
+			}catch(Exception e){}
+		}
+		start.setVisible(false);
+		start.removeMouseListener(this);
+		start.removeKeyListener(this);
 
 		// set pets
 		layout.setPetInit(Pets);
@@ -63,7 +97,7 @@ public class Arena1 extends POOArena{
 			background.add(Button[i], JLayeredPane.POPUP_LAYER);
 			
 		}
-        mainFrame.setVisible(true);
+        
         ready = true;
 	}
 	
@@ -71,10 +105,12 @@ public class Arena1 extends POOArena{
 	{
 		if(ready == false)
 			setPets();
+		int aliveNumber = TotalPetNumber;
 		for(int i=0; i<TotalPetNumber; i++)
 		{
 			if(((PetBase)Pets[i]).checkAlive())
 			{
+				layout.setVisibleFloor(i);
 				layout.setCurrentPetID(i);
 				layout.newRound(i);
 				layout.FloorEffect(Pets[i], ((PetBase)Pets[i]).getLocation());
@@ -82,7 +118,29 @@ public class Arena1 extends POOArena{
 				getPosition(Pets[i]);
 				Pets[i].act(this);
 				Button[i].setBorder(defaultBorder);
+				layout.resetVisibleFloor(i);
 			}
+		}
+		for(int i=0; i<TotalPetNumber; i++)
+		{
+			if(!((PetBase)Pets[i]).checkAlive())
+				aliveNumber --;
+		}
+		if(aliveNumber == 1)
+		{
+			start.setText("Game over");
+			start.setVisible(true);
+			start.addKeyListener(this);
+			start.addMouseListener(this);
+			while(gameStep == 1)
+			{
+				try{
+					TimeUnit.MICROSECONDS.sleep(100);
+				}catch(Exception e){}
+			}
+			start.removeMouseListener(this);
+			start.removeKeyListener(this);
+			return false;
 		}
 		return true;
 	}
@@ -123,6 +181,54 @@ public class Arena1 extends POOArena{
 		{
 			System.out.println(e);
 		}
+		
+	}
+	
+	// listeners
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		if(gameStep == 0)
+			gameStep = 1;
+		else if(gameStep == 1)
+			gameStep = 2;
+	}
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		if(gameStep == 0)
+			gameStep = 1;
+		else if(gameStep == 1)
+			gameStep = 2;
+	}
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
 		
 	}
 }

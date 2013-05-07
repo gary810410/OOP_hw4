@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 
 
 // width = 800;
@@ -18,6 +19,7 @@ public class LayoutManager implements MouseListener{
 	private static final int imgheight = 40;
 	int width;
 	int height;
+	public static final Border defaultBorder = UIManager.getBorder("Button.border");
 	private int TotalPet;
 	private CoordinateXY[] Position;
 	private JButton[] Button;
@@ -25,7 +27,10 @@ public class LayoutManager implements MouseListener{
 	private JButton[][] matrixbutton;
 	private int[][] floorEffectTime;
 	private int[][] floorEffectCauseBy;
+	private int[][] floorSlowDown;
+	private boolean[][] floorVisible;
 	private POOSkill[][] floorSkill;
+	
 	private int CurrentPetID;
 	private Icon icon;
 	private JButton Attack;
@@ -56,6 +61,8 @@ public class LayoutManager implements MouseListener{
 		floorEffectTime = new int[this.width/imgwidth][this.height/imgheight];
 		floorSkill = new POOSkill[this.width/imgwidth][this.height/imgheight];
 		floorEffectCauseBy = new int[this.width/imgwidth][this.height/imgheight];
+		floorSlowDown = new int[this.width/imgwidth][this.height/imgheight];
+		floorVisible = new boolean[this.width/imgwidth][this.height/imgheight];
 		CurrentPetID = -1;
 		showTime = 0;
 	}
@@ -104,15 +111,20 @@ public class LayoutManager implements MouseListener{
 			floorSkill[location.getX()][location.getY()] = skill;
 			floorEffectTime[location.getX()][location.getY()] = skill.getFloorEffectTime();
 			floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
+			floorSlowDown[location.getX()][location.getY()] = skill.getSlowDown();
+			floorVisible[location.getX()][location.getY()] = skill.floorVisible();
 			if(skill.GetFloorImg() != null)
 			{
 				TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
 				icon = TIcon.getIcon();
 				matrixbutton[location.getX()][location.getY()].setIcon(icon);
+				if(!skill.floorVisible())
+					matrixbutton[location.getX()][location.getY()].setVisible(false);
 			}else
 			{
 				matrixbutton[location.getX()][location.getY()].setIcon(null);
 			}
+			matrixbutton[location.getX()][location.getY()].setBorder(defaultBorder);
 		}
 		if(!skill.ShowOnce() || showTime ==0)
 		{
@@ -149,19 +161,61 @@ public class LayoutManager implements MouseListener{
 	}
 	public void FloorEffect(POOPet pet, CoordinateXY location)
 	{
+		
 		if(floorSkill[location.getX()][location.getY()] != null)
 		{
-			((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
+			if(((SkillList)(floorSkill[location.getX()][location.getY()])).effectSelf)
+			{
+				((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
+			}
+			else if(CurrentPetID != floorEffectCauseBy[location.getX()][location.getY()])
+			{
+				((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
+			}
 		}
+	}
+	public void setFloorEffect(CoordinateXY location, int time, int slowdown, boolean visible)
+	{
+		floorEffectTime[location.getX()][location.getY()] = time;
+		floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
+		floorSlowDown[location.getX()][location.getY()] = slowdown;
+		floorVisible[location.getX()][location.getY()] = visible;
 	}
 	public int exitCost(CoordinateXY location)
 	{
 		int cost = 1;
 		if(floorSkill[location.getX()][location.getY()] != null)
-			cost += ((SkillList)(floorSkill[location.getX()][location.getY()])).getSlowDown();
+			cost += floorSlowDown[location.getX()][location.getY()];
 		return cost;
 	}
-	
+	public void setVisibleFloor(int ID)
+	{
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+			{
+				if(floorSkill[i][j] != null)
+				{
+					if(floorEffectCauseBy[i][j] == ID || floorVisible[i][j])
+					{
+						matrixbutton[i][j].setVisible(true);
+					}
+				}
+			}
+	}
+	public void resetVisibleFloor(int ID)
+	{
+		for(int i=0; i<this.width/imgwidth; i++)
+			for(int j=0; j<this.height/imgheight; j++)
+			{
+				if(floorSkill[i][j] != null)
+				{
+					if(floorEffectCauseBy[i][j] == ID && !floorVisible[i][j])
+					{
+						matrixbutton[i][j].setVisible(false);
+					}
+				}
+			}
+	}
 	
 	
 	

@@ -61,17 +61,20 @@ class PetSpider extends PetBase{
 		MAXhp = 5; setHP(5);
 		MAXmp = 6; setMP(6);
 		MAXagi = 6;setAGI(6);
-		action = new POOAction[3];
+		action = new POOAction[4];
 		action[0] = new POOAction();
 		action[0].skill = new ActionTinyAttack();
 		action[1] = new POOAction();
 		action[1].skill = new ActionSilking();
 		action[2] = new POOAction();
-		action[2].skill = new SkillList();
+		action[2].skill = new ActionTrap();
+		action[3] = new POOAction();
+		action[3].skill = new SkillList();
+		
 	}
 	protected String[] getItemsList()
 	{
-		ListItems = new String[]{"TinyAttack", "Silking", "Wait"};
+		ListItems = new String[]{"TinyAttack", "Silking", "Trap", "Wait"};
 		return ListItems;
 	}
 	public String getImgPath()

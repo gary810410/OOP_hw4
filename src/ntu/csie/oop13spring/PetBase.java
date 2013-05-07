@@ -107,31 +107,33 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 		}
 		resetMatrixButton();
 		// do skill action
-		if(((SkillList)(currentAction.skill)).needAssignPet())
+		if(currentAction.skill != null)
 		{
-			for(int i=0; i<Pets.length; i++)
+			if(((SkillList)(currentAction.skill)).needAssignPet())
 			{
-				if(dest.distance(((PetBase)Pets[i]).getLocation()) <= ((SkillList)(currentAction.skill)).getSplashRange())
+				for(int i=0; i<Pets.length; i++)
 				{
-					currentAction.dest = Pets[i];
-					if(i !=  ID || ((SkillList)(currentAction.skill)).effectSelf())
-						currentAction.skill.act(currentAction.dest);
-				}		
+					if(dest.distance(((PetBase)Pets[i]).getLocation()) <= ((SkillList)(currentAction.skill)).getSplashRange())
+					{
+						currentAction.dest = Pets[i];
+						if(i !=  ID || ((SkillList)(currentAction.skill)).effectSelf())
+							currentAction.skill.act(currentAction.dest);
+					}		
+				}
 			}
+			else
+			{
+				for(int i=0; i<Pets.length; i++)
+					if(((PetBase)Pets[i]).isTargeted())
+						currentAction.skill.act(Pets[i]);
+			}
+			
+			// set floor effect
+			for(int i=0; i<this.width/imgwidth; i++)
+				for(int j=0; j<this.height/imgheight; j++)
+					if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
+						layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
 		}
-		else
-		{
-			for(int i=0; i<Pets.length; i++)
-				if(((PetBase)Pets[i]).isTargeted())
-					currentAction.skill.act(Pets[i]);
-		}
-		
-		// set floor effect
-		for(int i=0; i<this.width/imgwidth; i++)
-			for(int j=0; j<this.height/imgheight; j++)
-				if(dest.distance(new CoordinateXY(i,j)) <= ((SkillList)(currentAction.skill)).getSplashRange())
-					layout.setFloor((SkillList)currentAction.skill, new CoordinateXY(i,j));
-		
 		// reset for the next pet
 		for(int i=0; i<Pets.length; i++)
 		{
@@ -171,6 +173,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	protected POOCoordinate move(POOArena arena)
 	{
 		movestep = 1;
+		currentAction.skill = null;
 		//System.out.println(location.getX() +" "+ location.getY());
 		menu.setActivate(true);
 		AGIused = 0;
@@ -241,6 +244,14 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	public JLayeredPane getBackGround()
 	{
 		return background;
+	}
+	public LayoutManager getLayout()
+	{
+		return layout;
+	}
+	public int getID()
+	{
+		return ID;
 	}
 	public void setMatrixButton()
 	{

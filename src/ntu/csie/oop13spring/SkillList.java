@@ -18,6 +18,7 @@ public class SkillList extends POOSkill{
 	protected CoordinateXY location;
 	protected int ImgSize;
 	protected boolean showOnce;
+	protected boolean floorVisible;
 	
 	public SkillList()
 	{
@@ -34,6 +35,7 @@ public class SkillList extends POOSkill{
 		floorSkill = false;
 		showOnce = true;
 		ImgSize = 40;
+		floorVisible = true;
 		location = new CoordinateXY(1,-1);
 	}
 	
@@ -111,6 +113,10 @@ public class SkillList extends POOSkill{
 	{
 		return floorSkill;
 	}
+	public boolean floorVisible()
+	{
+		return floorVisible;
+	}
 	public void checkAlive(POOPet pet)
 	{
 		int hp = pet.getHP();
@@ -172,8 +178,10 @@ class ActionMudSplash extends SkillList{
 		if(pet!= null)
 		{
 			int hp = pet.getHP();
-			if(hp > 0)
+			if(hp >= 2)
 				pet.setHP(hp -2);
+			else if(hp < 2)
+				pet.setHP(0);
 			int agi = pet.getAGI();
 			if(agi > 0)
 				pet.setAGI(agi -1);
@@ -206,8 +214,10 @@ class ActionFongi extends SkillList{
 			if(hp > 0)
 				pet.setHP(hp -1);
 			int agi = pet.getAGI();
-			if(agi > 0)
-				pet.setAGI(agi -2);
+			if(agi >= 2)
+				pet.setAGI(agi-2);
+			else if(agi < 2)
+				pet.setAGI(0);
 			checkAlive(pet);
 		}
 	}
@@ -236,11 +246,15 @@ class ActionSilking extends SkillList
 		if(pet!= null)
 		{
 			int mp = pet.getMP();
-			if(mp > 0)
-				pet.setMP(mp -2);
+			if(mp < 2)
+				pet.setMP(0);
+			else if(mp >= 2)
+				pet.setMP(mp-2);
 			int agi = pet.getAGI();
-			if(agi > 0)
-				pet.setAGI(agi -2);
+			if(agi < 2)
+				pet.setAGI(0);
+			else if(agi >= 2)
+				pet.setAGI(agi-2);
 		}
 		POOPet actPet = ((PetBase)pet).getCurrentPet();
 		CoordinateXY locationA = ((PetBase)pet).getLocation();
@@ -256,5 +270,42 @@ class ActionSilking extends SkillList
 			y = locationB.getY()-1;
 		((PetBase)pet).setLocation(x,y);
 		(((PetBase)pet).getitself()).setBounds(x*40, y*40, 40, 40);
+		(((PetBase)pet).getLayout()).FloorEffect(pet, new CoordinateXY(x,y));
+	}
+}
+class ActionTrap extends SkillList
+{
+	public ActionTrap()
+	{
+		MPcost = 2;
+		range = 2;
+		needAssignPet = true;
+		effectSelf = false;
+		splashrange = 0;
+		name = "trap";
+		AttackImage = "trap.png";
+		floorEffectTime = -1;
+		floorEffectImgPath = "trap.png";
+		floorSlowDownSpeed = 0;
+		floorSkill = true;
+		showOnce = true;
+		ImgSize = 40;
+		floorVisible = false;
+		location = new CoordinateXY(0,0);
+	}
+	public void act(POOPet pet) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void FloorEffect(POOPet pet)
+	{
+		(((PetBase)pet).getLayout()).setFloorEffect(((PetBase)pet).getLocation(), 2, 3, true);
+		int hp = pet.getHP();
+		if(hp >= 2)
+			pet.setHP(hp -2);
+		else if(hp < 2)
+			pet.setHP(0);
+		((PetBase)pet).setMoveStep(4);
+		checkAlive(pet);
 	}
 }
