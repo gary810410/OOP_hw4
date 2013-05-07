@@ -2,6 +2,7 @@ package ntu.csie.oop13spring;
 
 public class SkillList extends POOSkill{
 
+	protected String AttackImage;
 	protected double range;
 	protected boolean needAssignPet;
 	protected boolean effectSelf;
@@ -12,6 +13,9 @@ public class SkillList extends POOSkill{
 	protected int MPcost;
 	protected int floorSlowDownSpeed;
 	protected boolean floorSkill;
+	protected CoordinateXY location;
+	protected int ImgSize;
+	protected boolean showOnce;
 	
 	public SkillList()
 	{
@@ -21,10 +25,14 @@ public class SkillList extends POOSkill{
 		effectSelf = true;
 		splashrange = 0;
 		name = "wait";
+		AttackImage = "sleep.png";
 		floorEffectTime = 0;
 		floorEffectImgPath = null;
 		floorSlowDownSpeed = 0;
 		floorSkill = false;
+		showOnce = true;
+		ImgSize = 40;
+		location = new CoordinateXY(1,-1);
 	}
 	
 	// set normal action
@@ -48,6 +56,22 @@ public class SkillList extends POOSkill{
 	}
 	
 	// retrieval function
+	public String getAttackImg()
+	{
+		return AttackImage;
+	}
+	public boolean ShowOnce()
+	{
+		return showOnce;
+	}
+	public int getImgSize()
+	{
+		return ImgSize;
+	}
+	public CoordinateXY getLocation()
+	{
+		return location;
+	}
 	public boolean needAssignPet()
 	{
 		return needAssignPet;
@@ -95,6 +119,8 @@ class ActionTinyAttack extends SkillList{
 		effectSelf = true;
 		splashrange = 0;
 		name = "tinyAttack";
+		AttackImage = "TinyAttack.png";
+		location = new CoordinateXY(0,0);
 	}
 	public void act(POOPet pet)
 	{
@@ -118,9 +144,12 @@ class ActionMudSplash extends SkillList{
 		effectSelf = false;
 		splashrange = 1;
 		name = "Mud";
+		AttackImage = "MudBubble.png";
 		floorEffectTime = 1;
 		floorSlowDownSpeed = 1;
 		floorEffectImgPath = "brown.png";
+		ImgSize = 120;
+		location = new CoordinateXY(0,-1);
 	}
 	public void act(POOPet pet)
 	{
@@ -133,9 +162,6 @@ class ActionMudSplash extends SkillList{
 	}
 	public void FloorEffect(POOPet pet)
 	{
-		//int agi = pet.getAGI();
-		//if(agi > 0)
-		//	pet.setAGI(agi -1);
 	}
 }
 
@@ -149,8 +175,8 @@ class ActionFongi extends SkillList{
 		effectSelf = true;
 		splashrange = 0;
 		name = "Fongi";
-		floorEffectTime = 1;
-		floorEffectImgPath = "green.png";
+		AttackImage = "green.png";
+		location = new CoordinateXY(0,0);
 	}
 	public void act(POOPet pet)
 	{
@@ -163,5 +189,51 @@ class ActionFongi extends SkillList{
 			if(agi > 0)
 				pet.setAGI(agi -2);
 		}
+	}
+}
+class ActionSilking extends SkillList
+{
+	public ActionSilking()
+	{
+		MPcost = 1;
+		range = 5;
+		needAssignPet = true;
+		effectSelf = false;
+		splashrange = 0;
+		name = "Silking";
+		AttackImage = "Silking.png";
+		floorEffectTime = 0;
+		floorEffectImgPath = null;
+		floorSlowDownSpeed = 0;
+		floorSkill = false;
+		showOnce = true;
+		ImgSize = 40;
+		location = new CoordinateXY(0,0);
+	}
+	public void act(POOPet pet)
+	{
+		if(pet!= null)
+		{
+			int mp = pet.getMP();
+			if(mp > 0)
+				pet.setMP(mp -1);
+			int agi = pet.getAGI();
+			if(agi > 0)
+				pet.setAGI(agi -2);
+		}
+		POOPet actPet = ((PetBase)pet).getCurrentPet();
+		CoordinateXY locationA = ((PetBase)pet).getLocation();
+		CoordinateXY locationB = ((PetBase)actPet).getLocation();
+		int x = locationB.getX(),y = locationB.getY();
+		if(locationA.getX() > locationB.getX())
+			x = locationB.getX()+1;
+		else if(locationA.getX() < locationB.getX())
+			x = locationB.getX()-1;
+		if(locationA.getY() > locationB.getY())
+			y = locationB.getY()+1;
+		else if(locationA.getY() < locationB.getY())
+			y = locationB.getY()-1;
+		((PetBase)pet).setLocation(x,y);
+		(((PetBase)pet).getitself()).setBounds(x*40, y*40, 40, 40);
 	}
 }

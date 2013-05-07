@@ -3,6 +3,7 @@ package ntu.csie.oop13spring;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
 
@@ -27,6 +28,8 @@ public class LayoutManager implements MouseListener{
 	private POOSkill[][] floorSkill;
 	private int CurrentPetID;
 	private Icon icon;
+	private JButton Attack;
+	private int showTime;
 	
 	public LayoutManager(int width, int height, JLayeredPane background)
 	{
@@ -44,10 +47,17 @@ public class LayoutManager implements MouseListener{
 				this.background.add(matrixbutton[i][j], JLayeredPane.PALETTE_LAYER);
 				matrixbutton[i][j].addMouseListener(this);
 			}
+		Attack = new JButton();
+		Attack.setBounds(0,0,40,40);
+		Attack.setVisible(false);
+		Attack.setContentAreaFilled(false);
+		Attack.setOpaque(false);
+		this.background.add(Attack, JLayeredPane.POPUP_LAYER);
 		floorEffectTime = new int[this.width/imgwidth][this.height/imgheight];
 		floorSkill = new POOSkill[this.width/imgwidth][this.height/imgheight];
 		floorEffectCauseBy = new int[this.width/imgwidth][this.height/imgheight];
 		CurrentPetID = -1;
+		showTime = 0;
 	}
 	
 	public void setPetInit(POOPet[] Pets)
@@ -104,9 +114,24 @@ public class LayoutManager implements MouseListener{
 				matrixbutton[location.getX()][location.getY()].setIcon(null);
 			}
 		}
+		if(!skill.ShowOnce() || showTime ==0)
+		{
+			TransparentIcon TIcon = new TransparentIcon(skill.getAttackImg());
+			icon = TIcon.getIcon();
+			Attack.setIcon(icon);
+			CoordinateXY place = skill.getLocation();
+			Attack.setBounds((location.getX()+place.getX())*40,(location.getY()+place.getY())*40,skill.getImgSize(),skill.getImgSize());
+			Attack.setVisible(true);
+			try{
+				TimeUnit.MICROSECONDS.sleep(1000000);
+				}catch(Exception e){}
+			Attack.setVisible(false);
+			showTime ++;
+		}
 	}
 	public void newRound(int PetID)
 	{
+		showTime = 0;
 		for(int i=0; i<this.width/imgwidth; i++)
 			for(int j=0; j<this.height/imgheight; j++)
 			{

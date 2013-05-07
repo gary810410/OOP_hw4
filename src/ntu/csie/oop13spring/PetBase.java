@@ -156,6 +156,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	protected POOCoordinate move(POOArena arena)
 	{
 		movestep = 1;
+		//System.out.println(location.getX() +" "+ location.getY());
 		menu.setActivate(true);
 		AGIused = 0;
 		CurrentActID = ID;
@@ -173,6 +174,10 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	protected CoordinateXY getLocation()
 	{
 		return location;
+	}
+	protected void setLocation(int x, int y)
+	{
+		location.setXY(x,y);
 	}
 	public JButton getitself()
 	{
@@ -213,6 +218,10 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	public int getAGIused()
 	{
 		return AGIused;
+	}
+	public POOPet getCurrentPet()
+	{
+		return Pets[CurrentActID];
 	}
 	public void setMatrixButton()
 	{

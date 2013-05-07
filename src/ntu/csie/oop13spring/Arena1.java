@@ -28,7 +28,7 @@ public class Arena1 extends POOArena{
 	{
 		//Pets = getAllPets();
 		Pets = new POOPet[2];
-		Pets[0] = new PetSlime();
+		Pets[0] = new PetSpider();
 		Pets[1] = new PetMudMonster();
 		TotalPetNumber = Pets.length;
 		PetImg = new ImageButton[TotalPetNumber];
