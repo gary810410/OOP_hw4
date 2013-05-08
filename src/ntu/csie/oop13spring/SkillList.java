@@ -47,6 +47,9 @@ public class SkillList extends POOSkill{
 			pet.setMP(pet.getMP()+1);
 		if(pet.getAGI() < ((PetBase)pet).getMAXagi() && ((PetBase)pet).getAGIused() == 0)
 			pet.setAGI(pet.getAGI()+1);
+		if(pet instanceof PetSlime && pet.getHP() < ((PetBase)pet).getMAXhp())
+			pet.setHP(pet.getHP()+1);
+			
 		checkAlive(pet);
 	}
 	
@@ -127,6 +130,8 @@ public class SkillList extends POOSkill{
 			background.setLayer(((PetBase)pet).getitself(), JLayeredPane.MODAL_LAYER);
 			((PetBase)pet).getitself().setIcon(TIcon.getIcon());
 			((PetBase)pet).setRIP();
+			((PetBase)pet).setMoveStep(4);
+			Arena1.deathCount++;
 		}
 	}
 }
@@ -305,7 +310,7 @@ class ActionTrap extends SkillList
 			pet.setHP(hp -2);
 		else if(hp < 2)
 			pet.setHP(0);
-		((PetBase)pet).setMoveStep(4);
 		checkAlive(pet);
+		((PetBase)pet).setMoveStep(4);
 	}
 }

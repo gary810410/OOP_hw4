@@ -150,6 +150,8 @@ public class LayoutManager implements MouseListener{
 			tmp.slowdown = slowdown;
 			tmp.visible = visible;
 			tmp.causeBy = CurrentPetID;
+			resetVisibleFloor(CurrentPetID);
+			setVisibleFloor(CurrentPetID);
 		}
 	}
 	public int exitCost(CoordinateXY location)
@@ -281,7 +283,6 @@ class floorList{
 	public LinkedList<floorControl> search(CoordinateXY location)
 	{
 		status = null;
-		System.out.println("in"+AorB);
 		LinkedList<floorControl> linkedList = new LinkedList<floorControl>();
 		while(true)
 		{

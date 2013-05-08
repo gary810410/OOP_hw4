@@ -33,7 +33,7 @@ class PetMudMonster extends PetBase{
 class PetSlime extends PetBase{
 	public PetSlime()
 	{
-		MAXhp = 3; setHP(3);
+		MAXhp = 6; setHP(3);
 		MAXmp = 4; setMP(2);
 		MAXagi = 5;setAGI(4);
 		action = new POOAction[3];

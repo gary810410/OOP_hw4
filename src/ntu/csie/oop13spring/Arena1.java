@@ -31,6 +31,7 @@ public class Arena1 extends POOArena implements MouseListener, KeyListener{
 	public static final MatteBorder defaultBorder = new MatteBorder(0,0,0,0,defaultColor);
 	private boolean ready;
 	private int gameStep;
+	public static int deathCount = 0;
 	
 	public Arena1() throws IOException
 	{
@@ -105,9 +106,24 @@ public class Arena1 extends POOArena implements MouseListener, KeyListener{
 	{
 		if(ready == false)
 			setPets();
-		int aliveNumber = TotalPetNumber;
 		for(int i=0; i<TotalPetNumber; i++)
 		{
+			if(deathCount >= TotalPetNumber-1)
+			{
+				start.setText("Game over");
+				start.setVisible(true);
+				start.addKeyListener(this);
+				start.addMouseListener(this);
+				while(gameStep == 1)
+				{
+					try{
+						TimeUnit.MICROSECONDS.sleep(100);
+					}catch(Exception e){}
+				}
+				start.removeMouseListener(this);
+				start.removeKeyListener(this);
+				return false;
+			}
 			if(((PetBase)Pets[i]).checkAlive())
 			{
 				layout.setVisibleFloor(i);
@@ -120,27 +136,7 @@ public class Arena1 extends POOArena implements MouseListener, KeyListener{
 				Button[i].setBorder(defaultBorder);
 				layout.resetVisibleFloor(i);
 			}
-		}
-		for(int i=0; i<TotalPetNumber; i++)
-		{
-			if(!((PetBase)Pets[i]).checkAlive())
-				aliveNumber --;
-		}
-		if(aliveNumber == 1)
-		{
-			start.setText("Game over");
-			start.setVisible(true);
-			start.addKeyListener(this);
-			start.addMouseListener(this);
-			while(gameStep == 1)
-			{
-				try{
-					TimeUnit.MICROSECONDS.sleep(100);
-				}catch(Exception e){}
-			}
-			start.removeMouseListener(this);
-			start.removeKeyListener(this);
-			return false;
+			
 		}
 		return true;
 	}
