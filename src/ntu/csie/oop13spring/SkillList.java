@@ -47,9 +47,8 @@ public class SkillList extends POOSkill{
 			pet.setMP(pet.getMP()+1);
 		if(pet.getAGI() < ((PetBase)pet).getMAXagi() && ((PetBase)pet).getAGIused() == 0)
 			pet.setAGI(pet.getAGI()+1);
-		if(pet instanceof PetSlime && pet.getHP() < ((PetBase)pet).getMAXhp())
+		if(pet instanceof ntu.csie.oop13spring.PetSlime && pet.getHP() < ((PetBase)pet).getMAXhp() && ((PetBase)pet).getAGIused() == 0)
 			pet.setHP(pet.getHP()+1);
-			
 		checkAlive(pet);
 	}
 	
@@ -129,9 +128,11 @@ public class SkillList extends POOSkill{
 			JLayeredPane background = ((PetBase)pet).getBackGround();
 			background.setLayer(((PetBase)pet).getitself(), JLayeredPane.MODAL_LAYER);
 			((PetBase)pet).getitself().setIcon(TIcon.getIcon());
+			if(((PetBase)pet).checkAlive() == true)
+				Arena1.deathCount++;
 			((PetBase)pet).setRIP();
 			((PetBase)pet).setMoveStep(4);
-			Arena1.deathCount++;
+			
 		}
 	}
 }
@@ -153,8 +154,10 @@ class ActionTinyAttack extends SkillList{
 		if(pet != null)
 		{
 			int hp = pet.getHP();
-	        if (hp > 0)
-	            pet.setHP(hp - 1);
+			if(hp >= 2)
+				pet.setHP(hp -2);
+			else if(hp < 2)
+				pet.setHP(0);
 	        checkAlive(pet);
 		}
 	}
@@ -198,17 +201,17 @@ class ActionMudSplash extends SkillList{
 	}
 }
 
-class ActionFongi extends SkillList{
+class ActionMucus extends SkillList{
 	
-	public ActionFongi()
+	public ActionMucus()
 	{
 		MPcost = 1;
 		range = 3;
 		needAssignPet = true;
 		effectSelf = true;
 		splashrange = 0;
-		name = "Fongi";
-		AttackImage = "green.png";
+		name = "Mucus";
+		AttackImage = "mucus.png";
 		location = new CoordinateXY(0,0);
 	}
 	public void act(POOPet pet)
@@ -219,9 +222,9 @@ class ActionFongi extends SkillList{
 			if(hp > 0)
 				pet.setHP(hp -1);
 			int agi = pet.getAGI();
-			if(agi >= 2)
-				pet.setAGI(agi-2);
-			else if(agi < 2)
+			if(agi >= 3)
+				pet.setAGI(agi-3);
+			else if(agi < 3)
 				pet.setAGI(0);
 			checkAlive(pet);
 		}
@@ -276,6 +279,7 @@ class ActionSilking extends SkillList
 		((PetBase)pet).setLocation(x,y);
 		(((PetBase)pet).getitself()).setBounds(x*40, y*40, 40, 40);
 		(((PetBase)pet).getLayout()).FloorEffect(pet, new CoordinateXY(x,y));
+		checkAlive(pet);
 	}
 }
 class ActionTrap extends SkillList
@@ -304,13 +308,13 @@ class ActionTrap extends SkillList
 	}
 	public void FloorEffect(POOPet pet)
 	{
-		(((PetBase)pet).getLayout()).setFloorEffect(((PetBase)pet).getLocation(), 2, 3, true, this);
 		int hp = pet.getHP();
 		if(hp >= 2)
-			pet.setHP(hp -2);
+			pet.setHP(hp - 2);
 		else if(hp < 2)
 			pet.setHP(0);
 		checkAlive(pet);
+		(((PetBase)pet).getLayout()).setFloorEffect(((PetBase)pet).getLocation(), 2, 3, true, this);
 		((PetBase)pet).setMoveStep(4);
 	}
 }

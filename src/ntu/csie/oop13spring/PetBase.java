@@ -24,7 +24,8 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	
 	protected int imgwidth = 40;
 	protected int imgheight = 40;
-
+	protected boolean AI;
+	
 	protected String[] ListItems;
 	
 	public static final Color blueColor = new Color(0, 0, 255);
@@ -32,29 +33,32 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	public static final MatteBorder blueBorder = new MatteBorder(1,1,1,1,blueColor);
 	public static final MatteBorder redBorder = new MatteBorder(1,1,1,1,redColor);
 	public static final Border defaultBorder = UIManager.getBorder("Button.border");
+	public static final Color greenColor = new Color(0,255,0);
+	public static final MatteBorder greenBorder = new MatteBorder(2,2,2,2,greenColor);
 	
 	int width = 800;
 	int height = 600;
 	
-	private int ID;
+	protected int ID;
 	protected POOAction[] action;
-	private CoordinateXY location;
-	private LayoutManager layout;
-	private JButton[][] matrixbutton;
+	protected CoordinateXY location;
+	protected LayoutManager layout;
+	protected int exitCost;
+	protected JButton[][] matrixbutton;
 	private JLayeredPane background;
 	private Status_control status;
 	private JLabel statusLabel;
-	private JButton itself;
-	private static POOPet[] Pets;
+	protected JButton itself;
+	protected static POOPet[] Pets;
 	
-	private int movestep = 0;
+	protected int movestep = 0;
 	private boolean targeted;
-	private POOAction currentAction;
-	private static CoordinateXY dest;
+	protected POOAction currentAction;
+	protected static CoordinateXY dest;
 	private static int CurrentActID;
 	private Skill_menu menu;
 	private MovingStatus moveList;
-	private int AGIused;
+	protected int AGIused;
 	private boolean alive;
 	
 	protected int MAXhp;
@@ -66,17 +70,20 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 		MAXhp = 1; setHP(1);
 		MAXmp = 1; setMP(1);
 		MAXagi = 1;setAGI(1);
-		action = new POOAction[2];
+		action = new POOAction[1];
 		action[0] = new POOAction();
-		action[0].skill = new ActionTinyAttack();
-		action[1] = new POOAction();
-		action[1].skill = new SkillList();
+		action[0].skill = new SkillList();
 		currentAction = new POOAction();
 		targeted = false;
 		movestep = -1;
 		moveList = new MovingStatus();
 		alive = true;
+		AI = true;
 	}
+	
+	// need implement
+	abstract protected void AIAction();
+	
 	public boolean checkAlive()
 	{
 		return alive;
@@ -98,7 +105,6 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	protected POOAction act(POOArena arena)
 	{
 		CurrentActID = ID;
-		
 		while(movestep != 4)
 		{
 			try{
@@ -174,19 +180,25 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	{
 		movestep = 1;
 		currentAction.skill = null;
-		//System.out.println(location.getX() +" "+ location.getY());
-		menu.setActivate(true);
-		AGIused = 0;
 		CurrentActID = ID;
-		while(movestep == 1 || movestep == 2)
+		AGIused = 0;
+		if(AI)
 		{
-			try{
-			TimeUnit.MICROSECONDS.sleep(100);
-			}catch(Exception e)
-			{
-			}
+			AIAction();
 		}
-		menu.setActivate(false);
+		else
+		{
+			menu.setActivate(true);
+			while(movestep == 1 || movestep == 2)
+			{
+				try{
+				TimeUnit.MICROSECONDS.sleep(100);
+				}catch(Exception e)
+				{
+				}
+			}
+			menu.setActivate(false);
+		}
 		return location;
 	}
 	protected CoordinateXY getLocation()
@@ -253,6 +265,14 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	{
 		return ID;
 	}
+	public void setAI(boolean b)
+	{
+		AI = b;
+	}
+	public boolean ifAI()
+	{
+		return AI;
+	}
 	public void setMatrixButton()
 	{
 		for(int i=0; i<this.width/imgwidth; i++)
@@ -305,11 +325,74 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 		}
 		else
 		{
+			for(int i=0; i<this.width/imgwidth; i++)
+				for(int j=0; j<this.height/imgheight; j++)
+				{
+					if(location.distance(i, j) <= range)
+					{
+						matrixbutton[i][j].setBorder(redBorder);
+					}
+					matrixbutton[i][j].removeMouseListener(layout);
+					matrixbutton[i][j].addMouseListener(this);
+				}
+			try{
+				TimeUnit.MICROSECONDS.sleep(200000);
+			}catch(Exception e){}
 			dest = location;
 			movestep = 4;
 		}
 		return true;
 	}
+	
+	// for AI
+	void autoMove(CoordinateXY destination)
+	{
+		double shortest = location.distance(destination);
+		while(true)
+		{
+			exitCost = layout.exitCost(location);
+			boolean judge = false;
+			if(movestep != 1)
+				break;
+			if(AGIused+exitCost <= getAGI() && shortest > 1)
+			{
+				if(location.getX() < destination.getX())
+					judge = next(new CoordinateXY(location.getX()+1,location.getY()));
+				if(judge == false && location.getX() > destination.getX())
+					judge = next(new CoordinateXY(location.getX()-1,location.getY()));
+				if(judge == false && location.getY() > destination.getY())
+					judge = next(new CoordinateXY(location.getX(),location.getY()-1));
+				if(judge == false && location.getY() < destination.getY())
+					judge = next(new CoordinateXY(location.getX(),location.getY()+1));
+				if(judge == false)
+					break;
+			}else
+				break;
+			itself.setBounds(location.getX()*40, location.getY()*40, imgwidth, imgheight);
+			resetMatrixButton();
+			setMatrixButton();
+			try{
+				TimeUnit.MICROSECONDS.sleep(200000);
+			}catch(Exception e){}
+		}
+	}
+	public boolean next(CoordinateXY next)
+	{
+    	boolean cover = false;
+		for(int i=0; i<Pets.length; i++)
+    		if(next.equals(((PetBase)Pets[i]).getLocation()) && ((PetBase)Pets[i]).checkAlive())
+    			cover = true;
+    	if(cover == false)
+    	{
+    		location.setXY(next.getX(), next.getY());
+    		layout.FloorEffect(this, location);
+    		AGIused += exitCost;
+    		return true;
+    	}
+		return false;
+	}
+	
+	
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON1)
 		{
@@ -381,7 +464,7 @@ public  abstract class PetBase extends POOPet implements MouseListener, KeyListe
 	
 	// for key listener
 	public void keyPressed(KeyEvent e) {
-		int exitCost = layout.exitCost(location);
+		exitCost = layout.exitCost(location);
 		if(CurrentActID == ID && movestep == 1)
 		{
 			if(e.getKeyCode() == KeyEvent.VK_ESCAPE)

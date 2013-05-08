@@ -69,7 +69,16 @@ public class LayoutManager implements MouseListener{
 		this.Position = new CoordinateXY[TotalPet];
 		for(int i=0; i<TotalPet; i++)
 		{
-			Position[i] = new CoordinateXY();
+			while(true)
+			{
+				Position[i] = new CoordinateXY();
+				boolean samePlace = false;
+				for(int j=0; j<i; j++)
+					if(Position[i].equals(Position[j]))
+						samePlace = true;
+				if(samePlace == false)
+					break;
+			}
 		}
 		Button = new JButton[TotalPet];
 	}
@@ -135,7 +144,7 @@ public class LayoutManager implements MouseListener{
 				tmp = linkedList.removeLast();
 				if(tmp.skill.effectSelf())
 					tmp.skill.FloorEffect(pet);
-				else if(CurrentPetID != tmp.causeBy)
+				else if(((PetBase)pet).getID() != tmp.causeBy)
 					tmp.skill.FloorEffect(pet);
 			}
 			else
@@ -153,6 +162,22 @@ public class LayoutManager implements MouseListener{
 			resetVisibleFloor(CurrentPetID);
 			setVisibleFloor(CurrentPetID);
 		}
+	}
+	public boolean checkEffect(CoordinateXY location, PetBase Pet,  SkillList skill)
+	{
+		LinkedList<floorControl> linkedList = floorlist.search(location);
+		while(true)
+		{
+			if(!linkedList.isEmpty())
+			{
+				tmp = linkedList.removeLast();
+				if(tmp.skill.getName().equals(skill.getName()) && tmp.causeBy == Pet.getID())
+					return true;
+			}
+			else
+				break;
+		}
+		return false;
 	}
 	public int exitCost(CoordinateXY location)
 	{
