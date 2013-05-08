@@ -299,7 +299,7 @@ class ActionTrap extends SkillList
 	}
 	public void FloorEffect(POOPet pet)
 	{
-		(((PetBase)pet).getLayout()).setFloorEffect(((PetBase)pet).getLocation(), 2, 3, true);
+		(((PetBase)pet).getLayout()).setFloorEffect(((PetBase)pet).getLocation(), 2, 3, true, this);
 		int hp = pet.getHP();
 		if(hp >= 2)
 			pet.setHP(hp -2);

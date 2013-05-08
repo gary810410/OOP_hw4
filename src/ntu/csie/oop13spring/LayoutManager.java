@@ -3,6 +3,7 @@ package ntu.csie.oop13spring;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
@@ -25,16 +26,15 @@ public class LayoutManager implements MouseListener{
 	private JButton[] Button;
 	private JLayeredPane background;
 	private JButton[][] matrixbutton;
-	private int[][] floorEffectTime;
-	private int[][] floorEffectCauseBy;
-	private int[][] floorSlowDown;
-	private boolean[][] floorVisible;
-	private POOSkill[][] floorSkill;
+	
+	private floorList floorlist;
+	private floorControl tmp;
 	
 	private int CurrentPetID;
 	private Icon icon;
 	private JButton Attack;
 	private int showTime;
+	
 	
 	public LayoutManager(int width, int height, JLayeredPane background)
 	{
@@ -58,11 +58,7 @@ public class LayoutManager implements MouseListener{
 		Attack.setContentAreaFilled(false);
 		Attack.setOpaque(false);
 		this.background.add(Attack, JLayeredPane.POPUP_LAYER);
-		floorEffectTime = new int[this.width/imgwidth][this.height/imgheight];
-		floorSkill = new POOSkill[this.width/imgwidth][this.height/imgheight];
-		floorEffectCauseBy = new int[this.width/imgwidth][this.height/imgheight];
-		floorSlowDown = new int[this.width/imgwidth][this.height/imgheight];
-		floorVisible = new boolean[this.width/imgwidth][this.height/imgheight];
+		floorlist = new floorList(background);
 		CurrentPetID = -1;
 		showTime = 0;
 	}
@@ -107,25 +103,7 @@ public class LayoutManager implements MouseListener{
 	public void setFloor(SkillList skill, CoordinateXY location)
 	{
 		if(skill.isFloorSkill())
-		{
-			floorSkill[location.getX()][location.getY()] = skill;
-			floorEffectTime[location.getX()][location.getY()] = skill.getFloorEffectTime();
-			floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
-			floorSlowDown[location.getX()][location.getY()] = skill.getSlowDown();
-			floorVisible[location.getX()][location.getY()] = skill.floorVisible();
-			if(skill.GetFloorImg() != null)
-			{
-				TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
-				icon = TIcon.getIcon();
-				matrixbutton[location.getX()][location.getY()].setIcon(icon);
-				if(!skill.floorVisible())
-					matrixbutton[location.getX()][location.getY()].setVisible(false);
-			}else
-			{
-				matrixbutton[location.getX()][location.getY()].setIcon(null);
-			}
-			matrixbutton[location.getX()][location.getY()].setBorder(defaultBorder);
-		}
+			floorlist.add(skill, skill.getFloorEffectTime(), skill.floorVisible(), location, skill.GetFloorImg(), CurrentPetID, skill.getSlowDown());
 		if(!skill.ShowOnce() || showTime ==0)
 		{
 			TransparentIcon TIcon = new TransparentIcon(skill.getAttackImg());
@@ -144,77 +122,59 @@ public class LayoutManager implements MouseListener{
 	public void newRound(int PetID)
 	{
 		showTime = 0;
-		for(int i=0; i<this.width/imgwidth; i++)
-			for(int j=0; j<this.height/imgheight; j++)
-			{
-				if(floorEffectCauseBy[i][j] == PetID && floorEffectTime[i][j] > 0)
-				{
-					floorEffectTime[i][j] --;
-					if(floorEffectTime[i][j] == 0)
-					{
-						floorSkill[i][j] = null;
-						floorEffectCauseBy[i][j] = -1;
-						matrixbutton[i][j].setIcon(null);
-					}
-				}
-			}
+		floorlist.newRound(PetID);
+
 	}
 	public void FloorEffect(POOPet pet, CoordinateXY location)
 	{
-		
-		if(floorSkill[location.getX()][location.getY()] != null)
+		LinkedList<floorControl> linkedList = floorlist.search(location);
+		while(true)
 		{
-			if(((SkillList)(floorSkill[location.getX()][location.getY()])).effectSelf)
+			if(!linkedList.isEmpty())
 			{
-				((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
+				tmp = linkedList.removeLast();
+				if(tmp.skill.effectSelf())
+					tmp.skill.FloorEffect(pet);
+				else if(CurrentPetID != tmp.causeBy)
+					tmp.skill.FloorEffect(pet);
 			}
-			else if(CurrentPetID != floorEffectCauseBy[location.getX()][location.getY()])
-			{
-				((SkillList)(floorSkill[location.getX()][location.getY()])).FloorEffect(pet);
-			}
+			else
+				break;
 		}
 	}
-	public void setFloorEffect(CoordinateXY location, int time, int slowdown, boolean visible)
+	public void setFloorEffect(CoordinateXY location, int time, int slowdown, boolean visible, SkillList skill)
 	{
-		floorEffectTime[location.getX()][location.getY()] = time;
-		floorEffectCauseBy[location.getX()][location.getY()] = CurrentPetID;
-		floorSlowDown[location.getX()][location.getY()] = slowdown;
-		floorVisible[location.getX()][location.getY()] = visible;
+		if(tmp != null)
+		{
+			tmp.time = time;
+			tmp.slowdown = slowdown;
+			tmp.visible = visible;
+			tmp.causeBy = CurrentPetID;
+		}
 	}
 	public int exitCost(CoordinateXY location)
 	{
 		int cost = 1;
-		if(floorSkill[location.getX()][location.getY()] != null)
-			cost += floorSlowDown[location.getX()][location.getY()];
+		LinkedList<floorControl> linkedList = floorlist.search(location);
+		while(true)
+		{
+			if(!linkedList.isEmpty())
+			{
+				tmp = linkedList.removeLast();
+				cost += tmp.slowdown;
+			}
+			else
+				break;
+		}
 		return cost;
 	}
 	public void setVisibleFloor(int ID)
-	{
-		for(int i=0; i<this.width/imgwidth; i++)
-			for(int j=0; j<this.height/imgheight; j++)
-			{
-				if(floorSkill[i][j] != null)
-				{
-					if(floorEffectCauseBy[i][j] == ID || floorVisible[i][j])
-					{
-						matrixbutton[i][j].setVisible(true);
-					}
-				}
-			}
+	{	
+		floorlist.setVisible(ID);
 	}
 	public void resetVisibleFloor(int ID)
 	{
-		for(int i=0; i<this.width/imgwidth; i++)
-			for(int j=0; j<this.height/imgheight; j++)
-			{
-				if(floorSkill[i][j] != null)
-				{
-					if(floorEffectCauseBy[i][j] == ID && !floorVisible[i][j])
-					{
-						matrixbutton[i][j].setVisible(false);
-					}
-				}
-			}
+		floorlist.resetVisible(ID);
 	}
 	
 	
@@ -250,5 +210,190 @@ public class LayoutManager implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// do nothing
+	}
+}
+
+class floorControl{
+	public SkillList skill;
+	public int time;
+	public boolean visible;
+	public CoordinateXY location;
+	public String img;
+	public int causeBy;
+	public int slowdown;
+	public JButton button;
+	
+	floorControl(SkillList skill, int time, boolean visible, CoordinateXY location, String img, int causeBy, int slowdown, JButton button)
+	{
+		this.skill = skill;
+		this.time = time;
+		this.visible = visible;
+		this.location = new CoordinateXY(location.getX(), location.getY());
+		this.img = img;
+		this.causeBy = causeBy;
+		this.slowdown = slowdown;
+		this.button = button;
+	}
+}
+
+class floorList{
+	private LinkedList<floorControl> linkedListA;
+	private LinkedList<floorControl> linkedListB;
+	private JButton button;
+	private boolean AorB;
+	private floorControl status;
+	private JLayeredPane background;
+	
+	public floorList(JLayeredPane background)
+	{
+		this.background = background;
+		linkedListA = new LinkedList<floorControl>();
+		linkedListB = new LinkedList<floorControl>();
+		AorB = true;
+	}
+	public void add(SkillList skill, int time, boolean visible, CoordinateXY location, String img, int causeBy, int slowdown)
+	{
+		
+		button = new JButton();
+		button.setOpaque(false);
+		button.setContentAreaFilled(false);
+		button.setBounds(location.getX()*40, location.getY()*40, 40, 40);
+		this.background.add(button, new Integer(50));
+		if(img != null)
+		{
+			ImageIcon icon;
+			TransparentIcon TIcon = new TransparentIcon(skill.GetFloorImg());
+			icon = TIcon.getIcon();
+			button.setIcon(icon);
+			if(!skill.floorVisible())
+				button.setVisible(false);
+		}else
+		{
+			button.setIcon(null);
+		}
+		
+		status = new floorControl(skill, time, visible, location, img, causeBy, slowdown, button);
+		if(AorB)
+			linkedListA.addLast(status);
+		else
+			linkedListB.addLast(status);
+	}
+	public LinkedList<floorControl> search(CoordinateXY location)
+	{
+		status = null;
+		System.out.println("in"+AorB);
+		LinkedList<floorControl> linkedList = new LinkedList<floorControl>();
+		while(true)
+		{
+			if(AorB && !linkedListA.isEmpty())
+			{
+				status = linkedListA.removeLast();
+				linkedListB.addLast(status);
+				if(status.location.equals(location))
+					linkedList.addLast(status);
+			}
+			else if(!AorB && !linkedListB.isEmpty())
+			{
+				status = linkedListB.removeLast();
+				linkedListA.addLast(status);
+				if(status.location.equals(location))
+					linkedList.addLast(status);
+			}
+			else
+				break;
+		}
+		AorB = !AorB;
+		return linkedList;
+	}
+	public void newRound(int ID)
+	{
+		while(true)
+		{
+			if(AorB && !linkedListA.isEmpty())
+			{
+				status = linkedListA.removeLast();
+				
+				if(status.causeBy == ID)
+				{
+					if(status.time > 0)
+						status.time--;
+					if(status.time == 0)
+						status.button.setVisible(false);
+					else
+						linkedListB.addLast(status);
+				}
+				else
+					linkedListB.addLast(status);
+			}
+			else if(!AorB && !linkedListB.isEmpty())
+			{
+				status = linkedListB.removeLast();
+				
+				if(status.causeBy == ID)
+				{
+					if(status.time > 0)
+						status.time--;
+					if(status.time == 0)
+						status.button.setVisible(false);
+					else
+						linkedListA.addLast(status);
+				}
+				else
+					linkedListA.addLast(status);
+			}
+			else
+				break;
+		}
+		AorB = !AorB;
+	}
+	public void setVisible(int ID)
+	{
+		while(true)
+		{
+			if(AorB && !linkedListA.isEmpty())
+			{
+				status = linkedListA.removeLast();
+				linkedListB.addLast(status);
+				if(status.visible)
+					status.button.setVisible(true);
+				else if(ID == status.causeBy)
+					status.button.setVisible(true);
+			}
+			else if(!AorB && !linkedListB.isEmpty())
+			{
+				status = linkedListB.removeLast();
+				linkedListA.addLast(status);
+				if(status.visible)
+					status.button.setVisible(true);
+				else if(ID == status.causeBy)
+					status.button.setVisible(true);
+			}
+			else
+				break;
+		}
+		AorB = !AorB;
+	}
+	public void resetVisible(int ID)
+	{
+		while(true)
+		{
+			if(AorB && !linkedListA.isEmpty())
+			{
+				status = linkedListA.removeLast();
+				linkedListB.addLast(status);
+				if(!status.visible)
+					status.button.setVisible(false);
+			}
+			else if(!AorB && !linkedListB.isEmpty())
+			{
+				status = linkedListB.removeLast();
+				linkedListA.addLast(status);
+				if(!status.visible)
+					status.button.setVisible(false);
+			}
+			else
+				break;
+		}
+		AorB = !AorB;
 	}
 }
